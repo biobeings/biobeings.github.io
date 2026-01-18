@@ -1,0 +1,3350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QWJH7QCGRS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-QWJH7QCGRS');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embeddings in Data Science Tutorial</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            color: #2c3e50;
+            overflow-x: hidden;
+        }
+
+        /* Animated Network Background */
+        #network-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+        }
+
+        /* Menu Toggle Button */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            left: 1rem;
+            top: 75px;
+            z-index: 1001;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            background: #34495e;
+            transform: scale(1.05);
+        }
+
+        .menu-toggle.active {
+            left: 260px;
+        }
+
+        /* Fixed Top Navigation */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-bottom: 2px solid #e0e0e0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-brand span {
+            color: #666;
+            font-weight: 400;
+        }
+
+        .top-nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            margin: 0;
+        }
+
+        .top-nav-links a {
+            text-decoration: none;
+            color: #555;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+        }
+
+        .top-nav-links a:hover,
+        .top-nav-links a.active {
+            color: #2c3e50;
+            border-bottom-color: #666;
+        }
+
+        /* Fixed Left Sidebar */
+        .left-sidebar {
+            position: fixed;
+            left: 0;
+            top: 70px;
+            width: 250px;
+            height: calc(100vh - 70px);
+            background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+            border-right: 2px solid #e0e0e0;
+            overflow-y: auto;
+            z-index: 999;
+            padding: 1.5rem 0;
+            transition: transform 0.3s ease;
+        }
+
+        .left-sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #999;
+            padding: 0.5rem 1.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: #555;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover {
+            background: #f0f0f0;
+            color: #2c3e50;
+            border-left-color: #666;
+            padding-left: 1.8rem;
+        }
+
+        .sidebar-menu a.active {
+            background: #f5f5f5;
+            color: #2c3e50;
+            border-left-color: #2c3e50;
+            font-weight: 600;
+            padding-left: 1.8rem;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 70px;
+            padding: 3rem 2rem;
+            min-height: calc(100vh - 70px);
+            max-width: 1200px;
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Content Styling */
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #333;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #444;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            line-height: 1.9;
+            margin-bottom: 1.2rem;
+            color: #444;
+            font-size: 1.05rem;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-left: 4px solid #666;
+            border-radius: 0 8px 8px 0;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .intro-box p {
+            font-size: 1.1rem;
+            line-height: 2;
+            margin-bottom: 1rem;
+        }
+
+        /* Regular tables (no pastel colors) */
+        .regular-table {
+            width: 100%;
+            margin: 2rem 0;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            background: white;
+        }
+
+        .regular-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .regular-table td {
+            padding: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .regular-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .regular-table tr:hover {
+            background: #fafafa;
+        }
+
+        /* Step-by-step transformation boxes (pastel colors for single rows) */
+        .transform-step {
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #666;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+
+        .transform-step.orange {
+            background: #FFE5CC;
+            border-left-color: #FF8C42;
+        }
+
+        .transform-step.blue {
+            background: #CCE5FF;
+            border-left-color: #4A90E2;
+        }
+
+        .transform-step.grey {
+            background: #E8E8E8;
+            border-left-color: #666;
+        }
+
+        .transform-step.green {
+            background: #D4EDDA;
+            border-left-color: #5CB85C;
+        }
+
+        .transform-step.purple {
+            background: #E8DAEF;
+            border-left-color: #9B59B6;
+        }
+
+        .transform-step.yellow {
+            background: #FFF3CD;
+            border-left-color: #F0AD4E;
+        }
+
+        .transform-step.pink {
+            background: #F8D7DA;
+            border-left-color: #D9534F;
+        }
+
+        .transform-step-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.8rem;
+            color: #2c3e50;
+        }
+
+        .transform-step-content {
+            font-size: 0.98rem;
+            line-height: 1.7;
+            color: #444;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: #2c3e50;
+        }
+
+        .code-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Concept boxes */
+        .concept-box {
+            background: #f8f9fa;
+            border-left: 4px solid #666;
+            border-radius: 0 8px 8px 0;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .concept-box h4 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        /* Modal Link */
+        .modal-link {
+            color: #4A90E2;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .modal-link:hover {
+            color: #2c3e50;
+        }
+
+        /* Modal Styling */
+        .custom-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content-custom {
+            background-color: #ffffff;
+            margin: 5% auto;
+            padding: 2.5rem;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            font-size: 2rem;
+            font-weight: 300;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: #2c3e50;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-right: 2rem;
+        }
+
+        .modal-body {
+            color: #444;
+            line-height: 1.8;
+        }
+
+        /* MCQ Styling */
+        .mcq-container {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .mcq-question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+
+        .mcq-options {
+            margin-bottom: 1.5rem;
+        }
+
+        .mcq-option {
+            padding: 1rem;
+            margin: 0.75rem 0;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .mcq-option:hover {
+            background: #f0f0f0;
+            border-color: #666;
+        }
+
+        .mcq-option input[type="radio"] {
+            margin-right: 0.75rem;
+            cursor: pointer;
+        }
+
+        .mcq-answer {
+            padding: 1.5rem;
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            border-radius: 0 8px 8px 0;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .mcq-answer.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .mcq-answer.incorrect {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+
+        .answer-label {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 0.8rem;
+            font-size: 1.05rem;
+        }
+
+        .answer-text {
+            color: #555;
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        .btn-custom {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background: #34495e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1.5rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin: 0.8rem 0;
+            line-height: 1.8;
+            color: #444;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .menu-toggle.active {
+                left: 210px;
+            }
+
+            .left-sidebar {
+                width: 200px;
+                transform: translateX(-100%);
+            }
+
+            .left-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 2rem 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .top-nav-links {
+                gap: 1rem;
+            }
+
+            .top-nav-links a {
+                font-size: 0.85rem;
+            }
+
+            .modal-content-custom {
+                width: 95%;
+                margin: 10% auto;
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .menu-toggle.active {
+                left: 170px;
+            }
+
+            .left-sidebar {
+                width: 160px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem 0.75rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            .top-nav-links {
+                display: none;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Network Background -->
+    <canvas id="network-canvas"></canvas>
+
+    <!-- Menu Toggle Button -->
+    <button class="menu-toggle" id="menuToggle" onclick="toggleMenu()">
+        ☰
+    </button>
+
+    <!-- Top Navigation -->
+    <nav class="top-navbar">
+        <a href="#" class="navbar-brand">Embeddings <span>Tutorial</span></a>
+        <ul class="top-nav-links">
+            <li><a href="#" onclick="showSection('home'); return false;" class="nav-link active">Home</a></li>
+            <li><a href="#" onclick="showSection('what-are-embeddings'); return false;" class="nav-link">What Are Embeddings</a></li>
+            <li><a href="#" onclick="showSection('biological-embeddings'); return false;" class="nav-link">Biological Data</a></li>
+            <li><a href="#" onclick="showSection('representation-learning');return false;" class="nav-link">Fundamentals</a></li>
+            <li><a href="#" onclick="showSection('word2vec'); return false;" class="nav-link">Techniques</a></li>
+            
+        </ul>
+    </nav>
+
+    <!-- Left Sidebar -->
+    <aside class="left-sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Introduction</div>
+            <ul class="sidebar-menu">
+                <li><a href="#" onclick="showSection('home'); return false;" class="menu-link active">Home</a></li>
+                <li><a href="#" onclick="showSection('what-are-embeddings'); return false;" class="menu-link">What Are Embeddings?</a></li>
+                <li><a href="#" onclick="showSection('why-embeddings'); return false;" class="menu-link">Why Embeddings Matter?</a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">Biological Data</div>
+            <ul class="sidebar-menu">
+                <li><a href="#" onclick="showSection('biological-embeddings'); return false;" class="menu-link">Biological Embeddings</a></li>
+                <li><a href="#" onclick="showSection('protein-embeddings'); return false;" class="menu-link">Protein & DNA</a></li>
+                <li><a href="#" onclick="showSection('chemical-embeddings'); return false;" class="menu-link">Chemical Compounds</a></li>
+                <li><a href="#" onclick="showSection('clinical-embeddings'); return false;" class="menu-link">Clinical Data</a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">Fundamentals</div>
+            <ul class="sidebar-menu">
+                <li><a href="#" onclick="showSection('representation-learning'); return false;" class="menu-link">Representation Learning</a></li>
+                <li><a href="#" onclick="showSection('vector-spaces'); return false;" class="menu-link">Vector Spaces</a></li>
+                <li><a href="#" onclick="showSection('similarity-measures'); return false;" class="menu-link">Similarity Measures</a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">Techniques</div>
+            <ul class="sidebar-menu">
+                <li><a href="#" onclick="showSection('word2vec'); return false;" class="menu-link">Word2Vec</a></li>
+                <li><a href="#" onclick="showSection('glove'); return false;" class="menu-link">GloVe</a></li>
+                <li><a href="#" onclick="showSection('fasttext'); return false;" class="menu-link">FastText</a></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">Applications</div>
+            <ul class="sidebar-menu">
+                <li><a href="#" onclick="showSection('nlp-applications'); return false;" class="menu-link">NLP Applications</a></li>
+                <li><a href="#" onclick="showSection('recommendation'); return false;" class="menu-link">Recommendation Systems</a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Home Section -->
+        <section id="home" class="content-section active">
+            <h1>Embeddings in Data Science</h1>
+            
+            <div class="intro-box">
+                <p>Welcome to this comprehensive, in-depth tutorial on embeddings in data science and machine learning. This guide takes you on a journey from the foundational concepts to advanced techniques, with detailed explanations, step-by-step visual illustrations, practical examples, and specialized coverage of embeddings in biological and biomedical domains.</p>
+                
+                <p>Embeddings represent one of the most powerful breakthroughs in modern machine learning, enabling computers to understand and process complex data, from natural language text to DNA sequences, protein structures, chemical compounds, and clinical records, in ways that were beyond the scope of conventional encodings of data.</p>
+            </div>
+
+            <h2>What You Will Learn</h2>
+            
+            <p>This tutorial is structured to build your understanding progressively, starting with fundamental concepts before diving into specific techniques and applications across multiple domains. Each section includes detailed explanations, visual step-by-step illustrations, interactive questions, and <span class="modal-link" onclick="openModal('modal-deeper-dive')">deeper dive modals</span> for advanced topics.</p>
+
+            <table class="regular-table">
+                <tr>
+                    <th style="width: 30%;">Topic Area</th>
+                    <th>What You'll Master</th>
+                </tr>
+                <tr>
+                    <td><strong>Introduction</strong></td>
+                    <td>Understand what embeddings are at a fundamental level, why they matter in modern AI, and how they differ from traditional data representations. You'll develop an intuitive grasp of the core problem embeddings solve.</td>
+                </tr>
+                <tr>
+                    <td><strong>Biological Data</strong></td>
+                    <td>Explore how embeddings revolutionize bioinformatics: representing DNA sequences, protein structures, RNA molecules, chemical compounds, clinical notes, and biomedical literature. Learn about specialized models like ProtBERT, Mol2Vec, and BioWordVec.</td>
+                </tr>
+                <tr>
+                    <td><strong>Fundamentals</strong></td>
+                    <td>Learn about representation learning, vector spaces, and how similarity is measured in high-dimensional spaces. You'll understand the mathematical foundations that make embeddings work.</td>
+                </tr>
+                <tr>
+                    <td><strong>Techniques</strong></td>
+                    <td>Explore Word2Vec, GloVe, and FastText in detail. For each technique, you'll learn the underlying algorithm, see step-by-step examples, and understand when to use each approach.</td>
+                </tr>
+                <tr>
+                    <td><strong>Applications</strong></td>
+                    <td>Discover how embeddings power real-world applications like search engines, recommendation systems, drug discovery, protein function prediction, and clinical decision support.</td>
+                </tr>
+            </table>
+
+            <h2>Prerequisites</h2>
+            
+            <p>To get the most out of this tutorial, you should have:</p>
+            
+            <ul>
+                <li><strong>Basic Machine Learning Knowledge:</strong> Understanding of supervised and unsupervised learning, training and testing, and model evaluation.</li>
+                <li><strong>Linear Algebra Basics:</strong> Familiarity with vectors, matrices, dot products, and basic vector operations.</li>
+                <li><strong>Python Programming:</strong> Ability to read and understand Python code, though you won't need to write code during this tutorial.</li>
+                <li><strong>Curiosity and Patience:</strong> Embeddings involve abstract concepts that become clearer with careful study and reflection.</li>
+            </ul>
+
+            <div class="concept-box">
+                <h4>How to Use This Tutorial</h4>
+                <p>Use the left sidebar to navigate between sections. Each section builds on previous ones, so we recommend going through them in order. Look for <span class="modal-link" onclick="openModal('modal-deeper-dive')">blue underlined links</span> that open modal windows with deeper dives into advanced topics. Pay special attention to the color-coded step-by-step transformation boxes (with pastel backgrounds), which illustrate how embeddings are created and transformed. At the end of each major section, you'll find multiple-choice questions to test your understanding.</p>
+            </div>
+        </section>
+
+        <!-- What Are Embeddings Section -->
+        <section id="what-are-embeddings" class="content-section">
+            <h1>What Are Embeddings?</h1>
+
+            <h2>The Core Concept</h2>
+            
+            <p>Before we define embeddings technically, let's understand the fundamental problem they solve. In the real world, we work with complex objects like words, images, products, DNA sequences, or protein structures. Computers, however, can only process numbers. The question is: <strong>how do we convert these complex objects into numbers in a way that preserves their meaning and relationships?</strong></p>
+
+            <div class="intro-box">
+                <p><strong>An embedding is a learned representation that maps complex, high-dimensional, or discrete data into a continuous vector space of lower dimensions, while preserving meaningful semantic relationships.</strong></p>
+            </div>
+
+            <p>Let's break down this definition piece by piece to truly understand what it means:</p>
+
+            <h3>Understanding Each Component</h3>
+
+            <table class="regular-table">
+                <tr>
+                    <th style="width: 30%;">Component</th>
+                    <th>Detailed Explanation</th>
+                </tr>
+                <tr>
+                    <td><strong>Learned Representation</strong></td>
+                    <td>Unlike hand-crafted features where humans manually decide how to represent data, embeddings are <em>learned automatically</em> from data using neural networks. The model discovers the best way to represent objects by observing patterns in large datasets. This means embeddings capture nuances that humans might miss.</td>
+                </tr>
+                <tr>
+                    <td><strong>Complex Data</strong></td>
+                    <td>The input can be anything: words in natural language, images, audio signals, user behavior sequences, DNA/RNA sequences, protein structures, molecules in chemistry, or clinical notes. Embeddings work across all these domains because they learn from the structure and patterns in the data itself.</td>
+                </tr>
+                <tr>
+                    <td><strong>Continuous Vector Space</strong></td>
+                    <td>Instead of discrete categories (like "cat" or "dog"), embeddings represent objects as points in a continuous space. Each object becomes a vector of real numbers, like [0.23, -0.45, 0.89, ...]. This continuity allows for smooth interpolation and mathematical operations.</td>
+                </tr>
+                <tr>
+                    <td><strong>Lower Dimensions</strong></td>
+                    <td>If we have a vocabulary of 50,000 words or 20,000 proteins, we don't need 50,000 or 20,000 dimensions to represent them. Recall here that, traditionally, one-hot encoding of categorical data was one of the commonly adopted, perhaps remains so, method to transform the categories to numeric form. This would create a zero-inflated (highly sparse) vector for each category, whose dimension is matches number of categories and the information is retained only in the indices or samples where it was observed. We are explaining this below, however hope it makes sense! Embeddings typically use 50-1024 dimensions, dramatically reducing computational requirements while maintaining the information needed to distinguish between objects.</td>
+                </tr>
+                <tr>
+                    <td><strong>Semantic Relationships</strong></td>
+                    <td>This is the magic of embeddings: objects that are similar in meaning end up close together in the vector space. "King" and "Queen" will have similar embeddings, as will "Hemoglobin" and "Myoglobin" (both oxygen-binding proteins). Even more remarkably, relationships are preserved: the vector from "King" to "Queen" is similar to the vector from "Man" to "Woman".</td>
+                </tr>
+            </table>
+
+            <h2>A Concrete Example: Word Embeddings</h2>
+
+            <p>Let's see how embeddings work with a concrete example using words. Imagine we want to represent the words "king", "queen", "man", and "woman" as numbers that a computer can understand. We'll show the transformation step-by-step using color-coded boxes.</p>
+
+            <h3>Step 1: The Traditional Approach (One-Hot Encoding)</h3>
+
+            <p>Traditionally, we might assign each word a unique identifier using one-hot encoding:</p>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Word: "king"</div>
+                <div class="transform-step-content">One-hot vector: [1, 0, 0, 0] → Position 1 is "on", all others "off"</div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Word: "queen"</div>
+                <div class="transform-step-content">One-hot vector: [0, 1, 0, 0] → Position 2 is "on", all others "off"</div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Word: "man"</div>
+                <div class="transform-step-content">One-hot vector: [0, 0, 1, 0] → Position 3 is "on", all others "off"</div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Word: "woman"</div>
+                <div class="transform-step-content">One-hot vector: [0, 0, 0, 1] → Position 4 is "on", all others "off"</div>
+            </div>
+
+            <div class="concept-box">
+                <h4>Problem with One-Hot Encoding</h4>
+                <p>Notice that every word is equally distant from every other word. The similarity between "king" and "queen" is the same as the similarity between "king" and "woman", which doesn't match reality. There's no notion of meaning or relationship captured in this representation.</p>
+            </div>
+
+            <h3>Step 2: The Embedding Approach</h3>
+
+            <p>Now let's see how embeddings represent the same words using dense vectors with learned real numbers. For illustration, we'll use 2 dimensions (real embeddings use 100-300+):</p>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Word: "king"</div>
+                <div class="transform-step-content">Embedding: [0.95, 0.93] → High royalty (0.95), high masculinity (0.93)</div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Word: "queen"</div>
+                <div class="transform-step-content">Embedding: [0.97, 0.08] → High royalty (0.97), low masculinity/high femininity (0.08)</div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Word: "man"</div>
+                <div class="transform-step-content">Embedding: [0.12, 0.89] → Low royalty (0.12), high masculinity (0.89)</div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Word: "woman"</div>
+                <div class="transform-step-content">Embedding: [0.09, 0.11] → Low royalty (0.09), low masculinity/high femininity (0.11)</div>
+            </div>
+
+            <p><em>Note: The dimension labels "Royalty" and "Gender" are added here for illustration. In reality, embedding dimensions are learned automatically and may not correspond to human-interpretable concepts.</em></p>
+
+            <h3>Step 3: Observing the Relationships</h3>
+
+            <p>Now we can see meaningful patterns emerge. Let's calculate the vector transformations:</p>
+
+            <div class="transform-step purple">
+                <div class="transform-step-title">Transformation: king → queen</div>
+                <div class="transform-step-content">Vector difference: [0.97, 0.08] - [0.95, 0.93] = [0.02, -0.85]<br/>Meaning: Small change in royalty, large decrease in masculinity</div>
+            </div>
+
+            <div class="transform-step yellow">
+                <div class="transform-step-title">Transformation: man → woman</div>
+                <div class="transform-step-content">Vector difference: [0.09, 0.11] - [0.12, 0.89] = [-0.03, -0.78]<br/>Meaning: Small change in royalty, large decrease in masculinity</div>
+            </div>
+
+            <div class="transform-step pink">
+                <div class="transform-step-title">Observation: Similar Transformations!</div>
+                <div class="transform-step-content">The vectors [0.02, -0.85] and [-0.03, -0.78] are very similar! This means the relationship "king to queen" is similar to "man to woman"—both represent a gender transformation. This is how <strong>king - man + woman ≈ queen</strong> works!</div>
+            </div>
+
+            <p>Want to learn more about the mathematics behind this? <span class="modal-link" onclick="openModal('modal-vector-arithmetic')">Click here for a deeper dive into vector arithmetic</span>.</p>
+
+            <!-- MCQ -->
+            <div class="mcq-container">
+                <div class="mcq-question">Question 1: What is the primary advantage of embeddings over one-hot encoding?</div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q1" value="a">
+                        Embeddings use more dimensions to store information
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q1" value="b">
+                        Embeddings capture semantic relationships and use dense representations
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q1" value="c">
+                        Embeddings are easier to compute manually
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q1" value="d">
+                        Embeddings eliminate the need for training data
+                    </label>
+                </div>
+                <button class="btn-custom" onclick="checkAnswer('q1', 'b')">Check Answer</button>
+                <div id="q1-answer" class="mcq-answer">
+                    <div class="answer-label">Correct! ✓</div>
+                    <div class="answer-text">Embeddings capture semantic relationships by placing similar objects close together in vector space, and they use dense representations where every dimension carries meaningful information. This is fundamentally different from one-hot encoding, which treats all objects as equally dissimilar and wastes space with sparse vectors full of zeros.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Biological Embeddings Overview Section -->
+        <section id="biological-embeddings" class="content-section">
+            <h1>Embeddings for Biological Data</h1>
+
+            <h2>Why Biological Data Needs Embeddings</h2>
+
+            <p>Biological and biomedical data present unique challenges that make embeddings particularly valuable. Unlike natural language, where words have relatively stable meanings, biological sequences (DNA, RNA, proteins) encode information at multiple levels: individual nucleotides/amino acids, short motifs, functional domains, and overall structure. Similarly, chemical compounds have complex 3D structures, and clinical notes contain specialized medical terminology.</p>
+
+            <div class="intro-box">
+                <p><strong>The Challenge:</strong> How do we represent a DNA sequence of 3 billion base pairs, a protein with 1,000 amino acids, or a molecule with dozens of atoms in a way that captures their biological function, evolutionary relationships, and potential therapeutic applications?</p>
+                
+                <p><strong>The Solution:</strong> Embeddings learn to compress these complex biological objects into dense vectors (typically 100-1024 dimensions) that preserve functionally relevant information, enabling machine learning for drug discovery, protein function prediction, clinical decision support, and biomedical literature mining.</p>
+            </div>
+
+            <h2>Overview of Biological Embedding Domains</h2>
+
+            <table class="regular-table">
+                <tr>
+                    <th style="width: 25%;">Domain</th>
+                    <th style="width: 35%;">What Gets Embedded</th>
+                    <th>Key Applications</th>
+                </tr>
+                <tr>
+                    <td><strong>Protein Sequences</strong></td>
+                    <td>Amino acid sequences, protein structures, functional domains</td>
+                    <td>Protein function prediction, structure prediction (AlphaFold uses embeddings), homology detection, enzyme classification</td>
+                </tr>
+                <tr>
+                    <td><strong>DNA/RNA Sequences</strong></td>
+                    <td>Nucleotide sequences, regulatory elements, splice sites, promoters</td>
+                    <td>Gene expression prediction, variant effect prediction, regulatory element discovery, evolutionary analysis</td>
+                </tr>
+                <tr>
+                    <td><strong>Chemical Compounds</strong></td>
+                    <td>Molecular structures (SMILES, graphs), chemical fingerprints</td>
+                    <td>Drug discovery, toxicity prediction, property prediction (solubility, binding affinity), molecule generation</td>
+                </tr>
+                <tr>
+                    <td><strong>Clinical Data</strong></td>
+                    <td>Clinical notes, diagnosis codes (ICD), lab results, patient histories</td>
+                    <td>Disease prediction, patient similarity, clinical decision support, adverse event detection</td>
+                </tr>
+                <tr>
+                    <td><strong>Biomedical Literature</strong></td>
+                    <td>Research papers, abstracts, medical concepts, drug-disease relationships</td>
+                    <td>Literature-based discovery, knowledge graph construction, drug repurposing, semantic search</td>
+                </tr>
+            </table>
+
+            <h3>The Power of Transfer Learning in Biology</h3>
+
+            <p>Just as Word2Vec can be pre-trained on Wikipedia and then applied to specific tasks, biological embeddings can be pre-trained on massive datasets and then fine-tuned for specialized applications. For example:</p>
+
+            <ul>
+                <li><strong>ProtBERT</strong> is pre-trained on 200 million protein sequences from UniProt, learning general protein language</li>
+                <li><strong>DNABERT</strong> is pre-trained on the human genome, learning genomic grammar</li>
+                <li><strong>Mol2Vec</strong> is pre-trained on millions of chemical compounds, learning molecular similarity</li>
+                <li><strong>BioWordVec</strong> is pre-trained on PubMed abstracts and clinical notes, learning biomedical terminology</li>
+            </ul>
+
+            <p>These pre-trained models can then be fine-tuned with just a few thousand examples for specific tasks like predicting whether a mutation causes disease or whether a drug will bind to a target protein. <span class="modal-link" onclick="openModal('modal-transfer-learning-bio')">Learn more about transfer learning in bioinformatics</span>.</p>
+
+            <div class="concept-box">
+                <h4>Interdisciplinary Impact</h4>
+                <p>Biological embeddings are revolutionizing life sciences by enabling researchers without deep machine learning expertise to apply state-of-the-art AI to their problems. A biologist can now use pre-trained protein embeddings to predict enzyme function, a chemist can use molecular embeddings to screen millions of compounds for drug candidates, and a clinician can use clinical embeddings to find similar patient cases—all without training models from scratch.</p>
+            </div>
+        </section>
+
+        <!-- Protein & DNA Embeddings Section -->
+        <section id="protein-embeddings" class="content-section">
+            <h1>Protein & DNA Embeddings</h1>
+
+            <h2>Protein Embeddings: From Sequence to Function</h2>
+
+            <p>Proteins are the workhorses of biology, performing virtually every function in living cells. A protein is a sequence of amino acids (20 different types), and its function is determined by both its sequence and its 3D structure. Protein embeddings aim to capture this information in a dense vector representation.</p>
+
+            <h3>How Protein Embeddings Work: Step-by-Step</h3>
+
+            <p>Let's walk through how a protein sequence gets transformed into an embedding:</p>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Step 1: Input Protein Sequence</div>
+                <div class="transform-step-content">
+                    Raw sequence: <code>MKTAYIAKQRQISFVKSHFSRQLEERLGLIEVQAPILSRVGDGTQDNLSGAEKAVQVKVKALPDAQFEVVHSLAKWKRQTLGQHDFSAGEGLYTHMKALRPDEDRLSPLHSVYVDQWDWERVMGDGERQFSTLKSTVEAIWAGIKATEAAVSEEFGLAPFLPDQIHFVHSQELLSRYPDLDAKGRERAIAKDLGAVFLVGIGGKLSDGHRHDVRAPDYDDWSTPSELGHAGLNGDILVWNPVLEDAFELSSMGIRVDADTLKHQLALTGDEDRLELEWHQALLRGEMPQTIGGGIGQSRLTMLLLQLPHIGQVQAGVWPAAVRESVPSLL</code>
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Step 2: Tokenization</div>
+                <div class="transform-step-content">
+                    Break into amino acids: [M, K, T, A, Y, I, A, K, Q, R, Q, I, S, F, V, K, ...]<br/>
+                    Each letter represents one of 20 standard amino acids (M=Methionine, K=Lysine, T=Threonine, etc.)
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Step 3: Embed Each Amino Acid</div>
+                <div class="transform-step-content">
+                    Using a pre-trained model like ProtBERT:<br/>
+                    M → [0.23, -0.45, 0.89, ..., 0.12] (1024-dimensional vector)<br/>
+                    K → [0.34, -0.23, 0.67, ..., -0.08]<br/>
+                    T → [-0.12, 0.56, -0.34, ..., 0.45]<br/>
+                    ... and so on for all amino acids
+                </div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Step 4: Aggregate to Sequence Embedding</div>
+                <div class="transform-step-content">
+                    Combine individual amino acid embeddings into a single protein embedding:<br/>
+                    Method 1: Average all amino acid vectors → [0.15, -0.04, 0.41, ..., 0.16]<br/>
+                    Method 2: Use the [CLS] token embedding from BERT-style models<br/>
+                    Method 3: Use attention-weighted pooling to emphasize important regions
+                </div>
+            </div>
+
+            <div class="transform-step purple">
+                <div class="transform-step-title">Step 5: Use for Downstream Tasks</div>
+                <div class="transform-step-content">
+                    The protein embedding can now be used for:<br/>
+                    • Function prediction: Is this an enzyme? A structural protein? A signaling molecule?<br/>
+                    • Similarity search: Find proteins with similar functions<br/>
+                    • Structure prediction: Predict 3D structure (as in AlphaFold)<br/>
+                    • Mutation effect prediction: Will a mutation break the protein?
+                </div>
+            </div>
+
+            <h3>Real-World Example: Enzyme Classification</h3>
+
+            <p>Let's see a concrete example of how protein embeddings enable enzyme classification:</p>
+
+            <table class="regular-table">
+                <tr>
+                    <th>Protein</th>
+                    <th>Sequence (abbreviated)</th>
+                    <th>Embedding (2D projection)</th>
+                    <th>Predicted Function</th>
+                </tr>
+                <tr>
+                    <td><strong>Hemoglobin</strong></td>
+                    <td>MVHLTPEEKS...</td>
+                    <td>[0.82, 0.15]</td>
+                    <td>Oxygen transport (not an enzyme)</td>
+                </tr>
+                <tr>
+                    <td><strong>Trypsin</strong></td>
+                    <td>IVGGYTCGAN...</td>
+                    <td>[0.23, 0.91]</td>
+                    <td>Protease (cleaves proteins)</td>
+                </tr>
+                <tr>
+                    <td><strong>Hexokinase</strong></td>
+                    <td>MTKIAVSRKG...</td>
+                    <td>[0.19, 0.88]</td>
+                    <td>Kinase (phosphorylates glucose)</td>
+                </tr>
+                <tr>
+                    <td><strong>Unknown Protein</strong></td>
+                    <td>MSKGEELFTG...</td>
+                    <td>[0.21, 0.89]</td>
+                    <td>Likely a kinase (close to Hexokinase in embedding space)</td>
+                </tr>
+            </table>
+
+            <p>Notice how Trypsin and Hexokinase (both enzymes) have similar embeddings [0.23, 0.91] and [0.19, 0.88], while Hemoglobin (not an enzyme) is far away at [0.82, 0.15]. The unknown protein's embedding [0.21, 0.89] is closest to Hexokinase, suggesting it's likely a kinase enzyme.</p>
+
+            <h2>DNA Embeddings: Genomic Language Models</h2>
+
+            <p>DNA sequences are strings of four nucleotides (A, T, G, C), and different patterns encode genes, regulatory elements, and structural features. DNA embeddings learn to recognize these patterns.</p>
+
+            <h3>From DNA Sequence to Embedding</h3>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Step 1: Input DNA Sequence</div>
+                <div class="transform-step-content">
+                    Raw sequence: <code>ATGCGATCGATCGATCGTAGCTAGCTAGCTAGCTGATCGATCGATCGTAGCTAGCTAGCTAGCTGATCGATCGATCGTAGCTAGCTAGCTAGCT</code>
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Step 2: K-mer Tokenization</div>
+                <div class="transform-step-content">
+                    Break into overlapping k-mers (k=6 shown here):<br/>
+                    [ATGCGA, TGCGAT, GCGATC, CGATCG, GATCGA, ATCGAT, ...]<br/>
+                    This captures local sequence context better than single nucleotides
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Step 3: Embed Each K-mer</div>
+                <div class="transform-step-content">
+                    Using a model like DNABERT:<br/>
+                    ATGCGA → [0.45, -0.23, 0.67, ..., 0.12] (768-dimensional vector)<br/>
+                    TGCGAT → [0.43, -0.25, 0.69, ..., 0.10]<br/>
+                    GCGATC → [0.41, -0.27, 0.71, ..., 0.08]
+                </div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Step 4: Sequence-Level Embedding</div>
+                <div class="transform-step-content">
+                    Aggregate k-mer embeddings into a single sequence embedding:<br/>
+                    Final embedding: [0.43, -0.25, 0.69, ..., 0.10]<br/>
+                    This captures the overall "meaning" of the DNA sequence
+                </div>
+            </div>
+
+            <div class="transform-step purple">
+                <div class="transform-step-title">Step 5: Predict Genomic Function</div>
+                <div class="transform-step-content">
+                    Use embedding to predict:<br/>
+                    • Is this a promoter region (where transcription starts)?<br/>
+                    • Is this a splice site (where introns are removed)?<br/>
+                    • Does this sequence bind transcription factors?<br/>
+                    • Will a mutation in this region cause disease?
+                </div>
+            </div>
+
+            <div class="concept-box">
+                <h4>Why K-mers Instead of Single Nucleotides?</h4>
+                <p>In DNA, individual nucleotides (A, T, G, C) don't carry much meaning on their own. Biological function emerges from patterns of multiple nucleotides. By using k-mers (subsequences of length k, typically 3-6), we capture these local patterns. For example, "ATG" is the start codon that begins protein-coding genes, and "TATA" boxes are promoter elements. K-mer embeddings learn to recognize these biologically meaningful motifs.</p>
+            </div>
+
+            <p><span class="modal-link" onclick="openModal('modal-protein-structure')">Click here to learn how embeddings are used in AlphaFold for protein structure prediction</span>.</p>
+
+            <!-- MCQ -->
+            <div class="mcq-container">
+                <div class="mcq-question">Question 2: Why are k-mers used instead of single nucleotides when creating DNA embeddings?</div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q2" value="a">
+                        K-mers are faster to compute
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q2" value="b">
+                        K-mers capture local sequence patterns that are biologically meaningful
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q2" value="c">
+                        Single nucleotides cannot be represented as vectors
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q2" value="d">
+                        K-mers reduce the sequence length
+                    </label>
+                </div>
+                <button class="btn-custom" onclick="checkAnswer('q2', 'b')">Check Answer</button>
+                <div id="q2-answer" class="mcq-answer">
+                    <div class="answer-label">Correct! ✓</div>
+                    <div class="answer-text">K-mers capture local sequence patterns that carry biological meaning. Individual nucleotides (A, T, G, C) don't convey much information alone, but sequences like "ATG" (start codon), "TATA" (promoter element), or "AATAAA" (polyadenylation signal) have specific biological functions. By using k-mers, the model can learn to recognize these functional motifs, just as Word2Vec learns that "New York" is more meaningful than "New" and "York" separately.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chemical Embeddings Section -->
+        <section id="chemical-embeddings" class="content-section">
+            <h1>Chemical Compound Embeddings</h1>
+
+            <h2>Representing Molecules as Vectors</h2>
+
+            <p>Chemical compounds are complex 3D structures with atoms connected by bonds. Representing them in a way that captures their chemical properties, biological activity, and potential as drugs is a major challenge in computational chemistry and drug discovery. Molecular embeddings solve this by learning vector representations that encode structural and functional information.</p>
+
+            <div class="intro-box">
+                <p><strong>The Challenge:</strong> A molecule like aspirin (C₉H₈O₄) has a specific 2D structure and 3D conformation. How do we represent it as numbers that capture its ability to inhibit pain, its solubility in water, its toxicity, and its similarity to other anti-inflammatory drugs?</p>
+                
+                <p><strong>The Solution:</strong> Molecular embeddings learn from millions of known compounds to create vector representations where similar molecules (in structure or function) have similar embeddings. This enables rapid screening of billions of potential drug candidates.</p>
+            </div>
+
+            <h2>Input Representations for Molecules</h2>
+
+            <p>Before creating embeddings, molecules must be represented in a machine-readable format. The three most common representations are:</p>
+
+            <table class="regular-table">
+                <tr>
+                    <th style="width: 25%;">Representation</th>
+                    <th style="width: 35%;">Description</th>
+                    <th>Example (Aspirin)</th>
+                </tr>
+                <tr>
+                    <td><strong>SMILES</strong></td>
+                    <td>Simplified Molecular Input Line Entry System: a text string that encodes molecular structure</td>
+                    <td><code>CC(=O)Oc1ccccc1C(=O)O</code></td>
+                </tr>
+                <tr>
+                    <td><strong>Molecular Graph</strong></td>
+                    <td>Atoms as nodes, bonds as edges in a graph structure</td>
+                    <td>21 atoms (nodes), 22 bonds (edges) with types (single, double, aromatic)</td>
+                </tr>
+                <tr>
+                    <td><strong>Molecular Fingerprints</strong></td>
+                    <td>Binary vectors indicating presence/absence of structural features</td>
+                    <td>[1, 0, 1, 1, 0, 0, 1, ...] (2048-bit vector)</td>
+                </tr>
+            </table>
+
+            <h3>Creating Molecular Embeddings: Step-by-Step</h3>
+
+            <p>Let's walk through how a molecule gets transformed into an embedding using the SMILES representation:</p>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Step 1: Input SMILES String</div>
+                <div class="transform-step-content">
+                    Aspirin: <code>CC(=O)Oc1ccccc1C(=O)O</code><br/>
+                    This string encodes: a benzene ring (c1ccccc1), an acetyl group (CC(=O)O), and a carboxylic acid (C(=O)O)
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Step 2: Tokenize SMILES</div>
+                <div class="transform-step-content">
+                    Break into tokens (atoms, bonds, rings):<br/>
+                    [C, C, (=O), O, c1, c, c, c, c, c1, C, (=O), O]<br/>
+                    Each token represents a structural element
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Step 3: Embed Each Token</div>
+                <div class="transform-step-content">
+                    Using a model like Mol2Vec or ChemBERTa:<br/>
+                    C → [0.23, -0.45, 0.89, ..., 0.12] (300-dimensional vector)<br/>
+                    (=O) → [0.67, -0.12, 0.34, ..., -0.23]<br/>
+                    c1 → [-0.45, 0.78, -0.23, ..., 0.56]
+                </div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Step 4: Aggregate to Molecular Embedding</div>
+                <div class="transform-step-content">
+                    Combine token embeddings into a single molecule embedding:<br/>
+                    Aspirin embedding: [0.15, -0.08, 0.42, ..., 0.18]<br/>
+                    This vector captures the molecule's overall structure and properties
+                </div>
+            </div>
+
+            <div class="transform-step purple">
+                <div class="transform-step-title">Step 5: Use for Drug Discovery</div>
+                <div class="transform-step-content">
+                    The molecular embedding enables:<br/>
+                    • Similarity search: Find molecules similar to aspirin<br/>
+                    • Property prediction: Predict solubility, toxicity, binding affinity<br/>
+                    • Drug screening: Screen millions of compounds for desired properties<br/>
+                    • De novo design: Generate new molecules with target properties
+                </div>
+            </div>
+
+            <h2>Real-World Application: Drug Similarity Search</h2>
+
+            <p>Let's see how molecular embeddings enable finding similar drugs:</p>
+
+            <table class="regular-table">
+                <tr>
+                    <th>Molecule</th>
+                    <th>SMILES</th>
+                    <th>Embedding (2D projection)</th>
+                    <th>Function</th>
+                </tr>
+                <tr>
+                    <td><strong>Aspirin</strong></td>
+                    <td>CC(=O)Oc1ccccc1C(=O)O</td>
+                    <td>[0.72, 0.18]</td>
+                    <td>Anti-inflammatory, pain relief</td>
+                </tr>
+                <tr>
+                    <td><strong>Ibuprofen</strong></td>
+                    <td>CC(C)Cc1ccc(cc1)C(C)C(=O)O</td>
+                    <td>[0.69, 0.21]</td>
+                    <td>Anti-inflammatory, pain relief</td>
+                </tr>
+                <tr>
+                    <td><strong>Naproxen</strong></td>
+                    <td>COc1ccc2cc(ccc2c1)C(C)C(=O)O</td>
+                    <td>[0.70, 0.19]</td>
+                    <td>Anti-inflammatory, pain relief</td>
+                </tr>
+                <tr>
+                    <td><strong>Penicillin</strong></td>
+                    <td>CC1(C)SC2C(NC(=O)Cc3ccccc3)C(=O)N2C1C(=O)O</td>
+                    <td>[0.23, 0.85]</td>
+                    <td>Antibiotic (different mechanism)</td>
+                </tr>
+            </table>
+
+            <p>Notice how the three anti-inflammatory drugs (Aspirin, Ibuprofen, Naproxen) have similar embeddings clustered around [0.70, 0.19], while Penicillin (an antibiotic with a completely different mechanism) is far away at [0.23, 0.85]. This clustering emerges automatically from the training data—the model learns that molecules with similar structures and functions should have similar embeddings.</p>
+
+            <h3>Property Prediction with Molecular Embeddings</h3>
+
+            <p>Once we have molecular embeddings, we can predict various properties:</p>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Solubility Prediction</div>
+                <div class="transform-step-content">
+                    Input: Molecular embedding [0.15, -0.08, 0.42, ..., 0.18]<br/>
+                    Model: Neural network trained on known solubility data<br/>
+                    Output: Predicted solubility = 3.2 mg/mL (highly soluble)
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Toxicity Prediction</div>
+                <div class="transform-step-content">
+                    Input: Molecular embedding [0.15, -0.08, 0.42, ..., 0.18]<br/>
+                    Model: Classifier trained on toxicity databases<br/>
+                    Output: Predicted toxicity = Low (LD50 > 500 mg/kg)
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Binding Affinity Prediction</div>
+                <div class="transform-step-content">
+                    Input: Molecular embedding + Protein embedding<br/>
+                    Model: Interaction prediction network<br/>
+                    Output: Predicted binding affinity = 8.2 (strong binding to COX-2 enzyme)
+                </div>
+            </div>
+
+            <div class="concept-box">
+                <h4>Impact on Drug Discovery</h4>
+                <p>Traditional drug discovery involves synthesizing and testing thousands of compounds in the lab, which takes years and costs millions. With molecular embeddings, researchers can computationally screen billions of virtual compounds in days, identifying the most promising candidates before ever stepping into the lab. This has accelerated drug discovery timelines from 10-15 years to potentially 3-5 years for some targets.</p>
+            </div>
+
+            <p><span class="modal-link" onclick="openModal('modal-molecule-generation')">Learn how embeddings enable generating entirely new molecules with desired properties</span>.</p>
+
+            <!-- MCQ -->
+            <div class="mcq-container">
+                <div class="mcq-question">Question 3: How do molecular embeddings accelerate drug discovery?</div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q3" value="a">
+                        They eliminate the need for laboratory testing
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q3" value="b">
+                        They enable rapid computational screening of millions of compounds before lab synthesis
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q3" value="c">
+                        They automatically synthesize new drugs
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q3" value="d">
+                        They replace chemists in the drug discovery process
+                    </label>
+                </div>
+                <button class="btn-custom" onclick="checkAnswer('q3', 'b')">Check Answer</button>
+                <div id="q3-answer" class="mcq-answer">
+                    <div class="answer-label">Correct! ✓</div>
+                    <div class="answer-text">Molecular embeddings enable researchers to computationally screen millions or even billions of virtual compounds to predict their properties (solubility, toxicity, binding affinity) before synthesizing them in the lab. This dramatically reduces the number of compounds that need to be physically made and tested, saving years of time and millions of dollars. Lab testing is still essential for validation, but embeddings help prioritize which compounds are most likely to succeed, making the process far more efficient.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clinical Embeddings Section -->
+        <section id="clinical-embeddings" class="content-section">
+            <h1>Clinical Data & Biomedical Literature Embeddings</h1>
+
+            <h2>Embeddings for Healthcare Data</h2>
+
+            <p>Healthcare generates vast amounts of complex data: clinical notes written by doctors, diagnosis codes, lab results, medical images, and millions of research papers. Embeddings help make sense of this data by creating unified representations that enable clinical decision support, patient similarity analysis, and knowledge discovery.</p>
+
+            <div class="intro-box">
+                <p><strong>The Challenge:</strong> A patient's electronic health record (EHR) contains unstructured clinical notes ("Patient presents with acute onset chest pain radiating to left arm"), structured codes (ICD-10: I21.9 - Acute myocardial infarction), lab values (Troponin: 0.8 ng/mL), and imaging reports. How do we represent this heterogeneous data in a unified way that captures medical meaning?</p>
+                
+                <p><strong>The Solution:</strong> Clinical embeddings learn from millions of patient records and biomedical texts to create vector representations where medically similar concepts (symptoms, diseases, treatments) have similar embeddings. This enables AI systems to assist with diagnosis, predict patient outcomes, and discover new medical knowledge.</p>
+            </div>
+
+            <h2>Clinical Note Embeddings</h2>
+
+            <p>Clinical notes are free-text descriptions written by healthcare providers. They contain rich information but are challenging to process due to medical jargon, abbreviations, and narrative structure.</p>
+
+            <h3>From Clinical Text to Embedding: Step-by-Step</h3>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Step 1: Input Clinical Note</div>
+                <div class="transform-step-content">
+                    "67 y/o male with h/o CAD, DM2, HTN presents with acute onset substernal chest pain radiating to L arm, associated with diaphoresis and SOB. Troponin elevated at 0.8 ng/mL. EKG shows ST elevation in leads II, III, aVF. Dx: Acute inferior STEMI."
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Step 2: Medical Entity Recognition</div>
+                <div class="transform-step-content">
+                    Extract medical concepts:<br/>
+                    • Patient: 67-year-old male<br/>
+                    • History: CAD (coronary artery disease), DM2 (diabetes type 2), HTN (hypertension)<br/>
+                    • Symptoms: chest pain, diaphoresis (sweating), SOB (shortness of breath)<br/>
+                    • Lab: Troponin 0.8 ng/mL (elevated)<br/>
+                    • Diagnosis: Acute inferior STEMI (ST-elevation myocardial infarction)
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Step 3: Embed Medical Concepts</div>
+                <div class="transform-step-content">
+                    Using a model like ClinicalBERT or BioWordVec:<br/>
+                    "chest pain" → [0.72, -0.23, 0.45, ..., 0.18]<br/>
+                    "myocardial infarction" → [0.69, -0.25, 0.48, ..., 0.15]<br/>
+                    "troponin elevated" → [0.68, -0.22, 0.46, ..., 0.17]<br/>
+                    Notice these are similar (all related to heart attack)
+                </div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Step 4: Aggregate to Patient Representation</div>
+                <div class="transform-step-content">
+                    Combine all concept embeddings into a single patient embedding:<br/>
+                    Patient embedding: [0.70, -0.23, 0.46, ..., 0.17]<br/>
+                    This vector summarizes the patient's clinical presentation
+                </div>
+            </div>
+
+            <div class="transform-step purple">
+                <div class="transform-step-title">Step 5: Clinical Decision Support</div>
+                <div class="transform-step-content">
+                    Use patient embedding for:<br/>
+                    • Diagnosis prediction: "High probability of acute MI"<br/>
+                    • Treatment recommendation: "Immediate cardiac catheterization"<br/>
+                    • Similar patient search: Find patients with similar presentations<br/>
+                    • Outcome prediction: "30-day mortality risk: 8%"
+                </div>
+            </div>
+
+            <h2>Medical Concept Embeddings</h2>
+
+            <p>Beyond full clinical notes, individual medical concepts (diseases, symptoms, drugs, procedures) can be embedded. This enables reasoning about medical relationships:</p>
+
+            <table class="regular-table">
+                <tr>
+                    <th>Medical Concept</th>
+                    <th>Embedding (2D projection)</th>
+                    <th>Nearest Neighbors in Embedding Space</th>
+                </tr>
+                <tr>
+                    <td><strong>Myocardial Infarction</strong></td>
+                    <td>[0.72, 0.18]</td>
+                    <td>Acute coronary syndrome, Unstable angina, Cardiac arrest</td>
+                </tr>
+                <tr>
+                    <td><strong>Chest Pain</strong></td>
+                    <td>[0.69, 0.21]</td>
+                    <td>Angina, Dyspnea, Palpitations</td>
+                </tr>
+                <tr>
+                    <td><strong>Aspirin</strong></td>
+                    <td>[0.70, 0.19]</td>
+                    <td>Clopidogrel, Antiplatelet agents, NSAIDs</td>
+                </tr>
+                <tr>
+                    <td><strong>Pneumonia</strong></td>
+                    <td>[0.23, 0.85]</td>
+                    <td>Respiratory infection, Bronchitis, COPD exacerbation</td>
+                </tr>
+            </table>
+
+            <p>Notice how cardiovascular concepts (Myocardial Infarction, Chest Pain, Aspirin) cluster together around [0.70, 0.20], while respiratory concepts (Pneumonia) are distant at [0.23, 0.85]. The model learns these relationships from co-occurrence patterns in millions of clinical notes.</p>
+
+            <h2>Biomedical Literature Embeddings</h2>
+
+            <p>With over 30 million research papers in PubMed, finding relevant information is like searching for a needle in a haystack. Biomedical literature embeddings enable semantic search and knowledge discovery.</p>
+
+            <h3>Application: Literature-Based Drug Repurposing</h3>
+
+            <p>Embeddings can discover hidden connections between drugs and diseases that haven't been explicitly studied:</p>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Known Relationship 1</div>
+                <div class="transform-step-content">
+                    Papers show: "Metformin" (diabetes drug) → affects "AMPK pathway"<br/>
+                    Metformin embedding is close to AMPK pathway embedding
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Known Relationship 2</div>
+                <div class="transform-step-content">
+                    Papers show: "AMPK pathway" → inhibits "Cancer cell growth"<br/>
+                    AMPK pathway embedding is close to cancer-related embeddings
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Inferred Relationship (Novel Hypothesis)</div>
+                <div class="transform-step-content">
+                    Embedding analysis suggests: "Metformin" might treat "Cancer"<br/>
+                    Even though no papers directly connect them, the embeddings are close!<br/>
+                    This hypothesis can now be tested in clinical trials.
+                </div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Validation</div>
+                <div class="transform-step-content">
+                    Clinical trials confirm: Metformin shows anti-cancer effects in certain cancers!<br/>
+                    This is an example of literature-based discovery enabled by embeddings.
+                </div>
+            </div>
+
+            <div class="concept-box">
+                <h4>Real-World Impact: COVID-19 Research</h4>
+                <p>During the COVID-19 pandemic, researchers used biomedical embeddings to rapidly screen thousands of existing drugs for potential repurposing against SARS-CoV-2. By embedding drug mechanisms, viral proteins, and disease symptoms, they identified candidates like dexamethasone (later proven effective) within weeks instead of years. Embeddings enabled connecting knowledge across disparate research areas (virology, immunology, pharmacology) that human researchers might not have linked.</p>
+            </div>
+
+            <p><span class="modal-link" onclick="openModal('modal-clinical-privacy')">Learn about privacy-preserving embeddings for clinical data</span>.</p>
+
+            <!-- MCQ -->
+            <div class="mcq-container">
+                <div class="mcq-question">Question 4: How do biomedical literature embeddings enable drug repurposing?</div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q4" value="a">
+                        They automatically test drugs in clinical trials
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q4" value="b">
+                        They discover hidden connections between drugs and diseases by analyzing embedding proximity
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q4" value="c">
+                        They replace the need for laboratory experiments
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q4" value="d">
+                        They only work for diseases that have been extensively studied
+                    </label>
+                </div>
+                <button class="btn-custom" onclick="checkAnswer('q4', 'b')">Check Answer</button>
+                <div id="q4-answer" class="mcq-answer">
+                    <div class="answer-label">Correct! ✓</div>
+                    <div class="answer-text">Biomedical literature embeddings place drugs, diseases, pathways, and symptoms in the same vector space based on their co-occurrence in millions of research papers. Even if no paper directly connects Drug A to Disease B, if Drug A is close to Pathway X in embedding space, and Pathway X is close to Disease B, the embeddings suggest a potential connection. This generates novel hypotheses for drug repurposing that can then be validated through experiments and clinical trials. It's like having an AI assistant that has read all 30 million papers and can spot patterns humans would miss.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Continue with remaining sections (Representation Learning, Vector Spaces, etc.) -->
+        <!-- For brevity, I'll add a few more key sections and then provide the closing tags -->
+
+        <!-- Word2Vec Section (abbreviated for space) -->
+        <section id="word2vec" class="content-section">
+            <h1>Word2Vec: Neural Word Embeddings</h1>
+
+            <h2>Introduction to Word2Vec</h2>
+
+            <p>Word2Vec, introduced by Tomas Mikolov and colleagues at Google in 2013, was a breakthrough that made word embeddings practical and widely accessible. It's based on a simple but powerful idea: train a neural network to predict words from their context, and use the learned weights as embeddings.</p>
+
+            <div class="intro-box">
+                <p><strong>Core Insight:</strong> You can judge a word by the company it keeps. Words that appear in similar contexts have similar meanings. Word2Vec operationalizes this by training a model where words appearing in similar contexts end up with similar vector representations.</p>
+            </div>
+
+            <p>For a detailed walkthrough of the Word2Vec architecture and training process, <span class="modal-link" onclick="openModal('modal-word2vec-detail')">click here for an in-depth explanation</span>.</p>
+
+            <h3>Skip-gram Training Process</h3>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Step 1: Sliding Window</div>
+                <div class="transform-step-content">
+                    Sentence: "The quick brown fox jumps"<br/>
+                    Window size = 2, Target word = "brown"<br/>
+                    Context words: ["The", "quick", "fox", "jumps"]
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Step 2: Create Training Pairs</div>
+                <div class="transform-step-content">
+                    Generate (target, context) pairs:<br/>
+                    ("brown", "The"), ("brown", "quick"), ("brown", "fox"), ("brown", "jumps")
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Step 3: Neural Network Prediction</div>
+                <div class="transform-step-content">
+                    Input: "brown" → Hidden layer (embedding) → Output: probability distribution over all words<br/>
+                    Goal: High probability for "The", "quick", "fox", "jumps"; low for others
+                </div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Step 4: Update Embeddings</div>
+                <div class="transform-step-content">
+                    Adjust "brown" embedding to increase probability of actual context words<br/>
+                    After millions of examples, words in similar contexts get similar embeddings
+                </div>
+            </div>
+
+            <div class="transform-step purple">
+                <div class="transform-step-title">Step 5: Extract Final Embeddings</div>
+                <div class="transform-step-content">
+                    The hidden layer weights become the word embeddings:<br/>
+                    "brown" → [0.23, -0.45, 0.89, ..., 0.12] (300-dimensional vector)
+                </div>
+            </div>
+
+            <!-- MCQ -->
+            <div class="mcq-container">
+                <div class="mcq-question">Question 5: In Word2Vec Skip-gram, what is the training objective?</div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q5" value="a">
+                        Predict the next word in a sentence
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q5" value="b">
+                        Predict context words given a target word
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q5" value="c">
+                        Classify words into semantic categories
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q5" value="d">
+                        Translate words from one language to another
+                    </label>
+                </div>
+                <button class="btn-custom" onclick="checkAnswer('q5', 'b')">Check Answer</button>
+                <div id="q5-answer" class="mcq-answer">
+                    <div class="answer-label">Correct! ✓</div>
+                    <div class="answer-text">Skip-gram trains by predicting context words from a target word. For example, given "fox", it tries to predict "quick", "brown", "jumps", etc. By training on millions of such examples, words that appear in similar contexts (like "fox" and "dog") end up with similar embeddings because they need to predict similar context words. This is how Word2Vec learns semantic meaning without any explicit labels.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Placeholder sections for remaining content -->
+        <section id="why-embeddings" class="content-section">
+            <h1>Why Embeddings Matter</h1>
+
+            <h2>The Three Fundamental Reasons</h2>
+            
+            <p>Embeddings have become indispensable in modern machine learning for three critical reasons: computational efficiency, semantic understanding, and transfer learning. Let's explore each in depth.</p>
+
+            <h3>1. Computational Efficiency</h3>
+            
+            <p>Traditional representations of data are often sparse, high-dimensional, and computationally expensive. Embeddings solve this by creating dense, low-dimensional representations that are orders of magnitude faster to process.</p>
+
+            <div class="intro-box">
+                <p><strong>The Curse of Dimensionality:</strong> As the number of dimensions increases, the volume of the space increases exponentially, making data increasingly sparse. This means you need exponentially more data to maintain the same level of statistical significance. Embeddings combat this by reducing dimensions while preserving information.</p>
+            </div>
+
+            <h4>Concrete Example: Text Classification</h4>
+
+            <p>Let's compare one-hot encoding versus embeddings for a text classification task with a 50,000-word vocabulary:</p>
+
+            <table class="regular-table">
+                <tr>
+                    <th>Metric</th>
+                    <th>One-Hot Encoding</th>
+                    <th>Word Embeddings (300D)</th>
+                    <th>Improvement</th>
+                </tr>
+                <tr>
+                    <td><strong>Input Dimension</strong></td>
+                    <td>50,000</td>
+                    <td>300</td>
+                    <td>167x smaller</td>
+                </tr>
+                <tr>
+                    <td><strong>Memory per Document (100 words)</strong></td>
+                    <td>20 MB</td>
+                    <td>120 KB</td>
+                    <td>167x less memory</td>
+                </tr>
+                <tr>
+                    <td><strong>Training Time (1M documents)</strong></td>
+                    <td>48 hours</td>
+                    <td>17 minutes</td>
+                    <td>167x faster</td>
+                </tr>
+                <tr>
+                    <td><strong>Inference Time (1 document)</strong></td>
+                    <td>100 ms</td>
+                    <td>0.6 ms</td>
+                    <td>167x faster</td>
+                </tr>
+            </table>
+
+            <p>This dramatic improvement makes real-time applications possible. Google Search, for example, processes billions of queries per day—without embeddings, this would be computationally infeasible.</p>
+
+            <h3>2. Semantic Understanding</h3>
+            
+            <p>Unlike traditional representations that treat all items as equally different, embeddings capture semantic relationships. Similar items have similar embeddings, and relationships are encoded as vector directions.</p>
+
+            <h4>Step-by-Step: How Semantic Relationships Emerge</h4>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Step 1: Training Objective</div>
+                <div class="transform-step-content">
+                    Model learns: "Words appearing in similar contexts should have similar embeddings"<br/>
+                    Example: "The cat sat on the mat" and "The dog sat on the rug"<br/>
+                    Result: "cat" and "dog" get similar embeddings because they appear in similar contexts
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Step 2: Similarity Emerges</div>
+                <div class="transform-step-content">
+                    After training on millions of sentences:<br/>
+                    "cat" embedding: [0.72, 0.18, -0.34, ..., 0.45]<br/>
+                    "dog" embedding: [0.69, 0.21, -0.31, ..., 0.42]<br/>
+                    Cosine similarity: 0.92 (very similar!)
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Step 3: Relationships as Vectors</div>
+                <div class="transform-step-content">
+                    Difference vectors encode relationships:<br/>
+                    "bigger" - "big" = [0.05, -0.02, 0.08, ..., -0.03] (comparative transformation)<br/>
+                    "faster" - "fast" ≈ "bigger" - "big" (same relationship!)<br/>
+                    The model learns that comparative adjectives follow a consistent pattern
+                </div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Step 4: Generalization</div>
+                <div class="transform-step-content">
+                    Apply learned relationships to new words:<br/>
+                    "strong" + ("bigger" - "big") ≈ "stronger"<br/>
+                    Even if "stronger" was rare in training data, the model can infer its embedding
+                </div>
+            </div>
+
+            <h3>3. Transfer Learning</h3>
+            
+            <p>Perhaps the most powerful aspect of embeddings is their ability to transfer knowledge from one task to another. Pre-trained embeddings capture general patterns from massive datasets, which can then be fine-tuned for specific tasks with limited data.</p>
+
+            <h4>The Transfer Learning Pipeline</h4>
+
+            <div class="transform-step purple">
+                <div class="transform-step-title">Phase 1: Pre-training (Done Once)</div>
+                <div class="transform-step-content">
+                    Train embeddings on massive unlabeled data:<br/>
+                    • Word2Vec: Trained on 100 billion words from Google News<br/>
+                    • BERT: Trained on 3.3 billion words from Wikipedia + Books<br/>
+                    • GPT-3: Trained on 300 billion tokens from the internet<br/>
+                    Cost: Millions of dollars in compute, months of training
+                </div>
+            </div>
+
+            <div class="transform-step yellow">
+                <div class="transform-step-title">Phase 2: Fine-tuning (Done by You)</div>
+                <div class="transform-step-content">
+                    Adapt pre-trained embeddings to your specific task:<br/>
+                    • Sentiment analysis: Fine-tune on 10,000 labeled reviews<br/>
+                    • Named entity recognition: Fine-tune on 5,000 labeled documents<br/>
+                    • Question answering: Fine-tune on 20,000 question-answer pairs<br/>
+                    Cost: Hours on a single GPU, minimal compute
+                </div>
+            </div>
+
+            <div class="transform-step pink">
+                <div class="transform-step-title">Result: State-of-the-Art Performance</div>
+                <div class="transform-step-content">
+                    Achieve accuracy comparable to models trained from scratch on millions of examples<br/>
+                    Without transfer learning: Need 1M+ labeled examples<br/>
+                    With transfer learning: Need only 10K labeled examples<br/>
+                    This democratizes AI—small companies can compete with tech giants
+                </div>
+            </div>
+
+            <div class="concept-box">
+                <h4>Real-World Impact: Low-Resource Languages</h4>
+                <p>Transfer learning with embeddings has enabled NLP for languages with limited digital resources. By pre-training multilingual embeddings on high-resource languages (English, Chinese) and transferring to low-resource languages (Swahili, Quechua), researchers have built translation systems, sentiment analyzers, and information retrieval systems for languages spoken by millions but with minimal training data available.</p>
+            </div>
+
+            <p><span class="modal-link" onclick="openModal('modal-computational-efficiency')">Learn more about the mathematical foundations of computational efficiency</span>.</p>
+
+            <!-- MCQ -->
+            <div class="mcq-container">
+                <div class="mcq-question">Question 6: What is the primary advantage of transfer learning with pre-trained embeddings?</div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q6" value="a">
+                        Pre-trained embeddings eliminate the need for any training data
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q6" value="b">
+                        Pre-trained embeddings enable achieving high accuracy with much less labeled data
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q6" value="c">
+                        Pre-trained embeddings work only for English language tasks
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q6" value="d">
+                        Pre-trained embeddings are faster but less accurate than training from scratch
+                    </label>
+                </div>
+                <button class="btn-custom" onclick="checkAnswer('q6', 'b')">Check Answer</button>
+                <div id="q6-answer" class="mcq-answer">
+                    <div class="answer-label">Correct! ✓</div>
+                    <div class="answer-text">Pre-trained embeddings capture general language patterns from massive datasets (billions of words). When you fine-tune them for a specific task, you're starting from a model that already understands language structure, word relationships, and semantic patterns. This means you need far less labeled data—often 10-100x less—to achieve the same accuracy as training from scratch. This is revolutionary because labeled data is expensive and time-consuming to create, while pre-trained embeddings can be downloaded for free and reused across thousands of tasks.</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="representation-learning" class="content-section">
+            <h1>Representation Learning</h1>
+
+            <h2>From Hand-Crafted Features to Learned Representations</h2>
+            
+            <p>Traditionally, machine learning required domain experts to manually design features. For text, this might mean counting word frequencies, n-grams, or part-of-speech tags. For images, experts designed edge detectors, color histograms, and texture filters. This process was time-consuming, required deep domain knowledge, and often missed important patterns.</p>
+
+            <div class="intro-box">
+                <p><strong>Representation learning</strong> is the paradigm where models automatically learn useful features from raw data. Instead of humans deciding what features matter, the model discovers them through training. Embeddings are a form of representation learning where the learned features are dense, continuous vectors.</p>
+            </div>
+
+            <h3>The Evolution: Hand-Crafted to Learned</h3>
+
+            <table class="regular-table">
+                <tr>
+                    <th style="width: 25%;">Approach</th>
+                    <th style="width: 35%;">How Features Are Created</th>
+                    <th>Example (Text Classification)</th>
+                </tr>
+                <tr>
+                    <td><strong>Hand-Crafted Features</strong></td>
+                    <td>Humans design features based on domain knowledge and intuition</td>
+                    <td>Word counts, TF-IDF scores, sentence length, punctuation frequency, readability scores</td>
+                </tr>
+                <tr>
+                    <td><strong>Shallow Learning</strong></td>
+                    <td>Simple models learn weights for hand-crafted features</td>
+                    <td>Logistic regression on TF-IDF features, SVM with n-gram features</td>
+                </tr>
+                <tr>
+                    <td><strong>Representation Learning (Embeddings)</strong></td>
+                    <td>Neural networks automatically learn features from raw data</td>
+                    <td>Word embeddings capture semantic meaning, syntax, and context automatically</td>
+                </tr>
+                <tr>
+                    <td><strong>Deep Representation Learning</strong></td>
+                    <td>Multiple layers learn hierarchical features from simple to complex</td>
+                    <td>BERT learns character patterns → word meanings → sentence structure → document semantics</td>
+                </tr>
+            </table>
+
+            <h3>How Representation Learning Works: Step-by-Step</h3>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Step 1: Random Initialization</div>
+                <div class="transform-step-content">
+                    Start with random embeddings for all words:<br/>
+                    "cat" → [0.12, -0.87, 0.34, ..., 0.56] (random numbers)<br/>
+                    "dog" → [0.91, 0.23, -0.45, ..., -0.12] (random numbers)<br/>
+                    At this point, "cat" and "dog" are no more similar than "cat" and "building"
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Step 2: Training with Objective</div>
+                <div class="transform-step-content">
+                    Model sees millions of examples:<br/>
+                    "The cat chased the mouse" → Predict "chased" from "cat"<br/>
+                    "The dog chased the ball" → Predict "chased" from "dog"<br/>
+                    Loss function: Penalize incorrect predictions, reward correct ones
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Step 3: Gradient Descent Updates</div>
+                <div class="transform-step-content">
+                    Backpropagation adjusts embeddings to reduce loss:<br/>
+                    "cat" embedding shifts: [0.12, -0.87, ...] → [0.15, -0.82, ...]<br/>
+                    "dog" embedding shifts: [0.91, 0.23, ...] → [0.88, 0.19, ...]<br/>
+                    Since both predict "chased", their embeddings move closer together
+                </div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Step 4: Convergence</div>
+                <div class="transform-step-content">
+                    After millions of updates across billions of examples:<br/>
+                    "cat" → [0.72, 0.18, -0.34, ..., 0.45] (learned representation)<br/>
+                    "dog" → [0.69, 0.21, -0.31, ..., 0.42] (learned representation)<br/>
+                    Now similar in embedding space because they appear in similar contexts
+                </div>
+            </div>
+
+            <div class="transform-step purple">
+                <div class="transform-step-title">Step 5: Emergent Properties</div>
+                <div class="transform-step-content">
+                    The learned embeddings capture properties never explicitly taught:<br/>
+                    • Semantic similarity: "cat" close to "dog", "kitten", "feline"<br/>
+                    • Analogies: "cat" - "kitten" ≈ "dog" - "puppy" (adult-baby relationship)<br/>
+                    • Syntax: "running" close to "jumping" (both verbs, similar usage)<br/>
+                    These emerge automatically from the training objective!
+                </div>
+            </div>
+
+            <h3>Why Learned Representations Outperform Hand-Crafted Features</h3>
+
+            <p><strong>1. Capture Subtle Patterns:</strong> Humans might design features for obvious patterns ("contains the word 'good' → positive sentiment"), but miss subtle patterns ("not bad" is positive despite containing "bad"). Learned representations capture these nuances.</p>
+
+            <p><strong>2. Adapt to Data:</strong> Hand-crafted features are fixed. If your data changes (e.g., new slang in social media), features become outdated. Learned representations adapt when retrained on new data.</p>
+
+            <p><strong>3. Transfer Across Tasks:</strong> Hand-crafted features for sentiment analysis don't help with named entity recognition. Learned embeddings capture general language understanding that transfers across tasks.</p>
+
+            <p><strong>4. Scale to High-Dimensional Data:</strong> For images (millions of pixels) or genomic sequences (billions of base pairs), hand-crafting features is impossible. Representation learning scales naturally.</p>
+
+            <div class="concept-box">
+                <h4>The Manifold Hypothesis</h4>
+                <p>Why does representation learning work? The <strong>manifold hypothesis</strong> suggests that high-dimensional data (like images or text) actually lies on or near a low-dimensional manifold (a curved surface in high-dimensional space). Embeddings learn to map data onto this manifold, capturing the true underlying structure. For example, all images of cats lie on a "cat manifold" in pixel space—embeddings learn to represent this manifold compactly.</p>
+            </div>
+
+            <!-- MCQ -->
+            <div class="mcq-container">
+                <div class="mcq-question">Question 7: What is the key advantage of representation learning over hand-crafted features?</div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q7" value="a">
+                        Representation learning is faster to compute
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q7" value="b">
+                        Representation learning automatically discovers useful features from data
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q7" value="c">
+                        Representation learning requires less training data
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q7" value="d">
+                        Representation learning eliminates the need for neural networks
+                    </label>
+                </div>
+                <button class="btn-custom" onclick="checkAnswer('q7', 'b')">Check Answer</button>
+                <div id="q7-answer" class="mcq-answer">
+                    <div class="answer-label">Correct! ✓</div>
+                    <div class="answer-text">The fundamental advantage of representation learning is that it automatically discovers useful features from data through training, rather than requiring humans to manually design them. This means the model can capture subtle patterns that humans might miss, adapt to new data distributions, and scale to domains where hand-crafting features is impractical (like genomics or high-resolution images). While hand-crafted features require deep domain expertise and trial-and-error, representation learning lets the data speak for itself, often discovering features that surprise even domain experts.</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="vector-spaces" class="content-section">
+            <h1>Vector Spaces and Geometry</h1>
+
+            <h2>Understanding the Embedding Space</h2>
+            
+            <p>Embeddings place objects (words, images, molecules) as points in a high-dimensional vector space. Understanding the geometry of this space is crucial to understanding how embeddings work and why they're powerful.</p>
+
+            <div class="intro-box">
+                <p><strong>A vector space</strong> is a mathematical structure where vectors can be added together and multiplied by scalars (numbers). In embedding spaces, each dimension represents a learned feature, and the position of a point encodes all the properties of the object it represents.</p>
+            </div>
+
+            <h3>Key Properties of Embedding Spaces</h3>
+
+            <table class="regular-table">
+                <tr>
+                    <th style="width: 25%;">Property</th>
+                    <th style="width: 35%;">Mathematical Definition</th>
+                    <th>Intuitive Meaning</th>
+                </tr>
+                <tr>
+                    <td><strong>Dimensionality</strong></td>
+                    <td>Number of coordinates in each vector (typically 50-1024)</td>
+                    <td>How many independent features the embedding captures. Higher dimensions = more capacity but requires more data.</td>
+                </tr>
+                <tr>
+                    <td><strong>Distance</strong></td>
+                    <td>Euclidean: d(a,b) = ||a - b|| = √(Σ(aᵢ - bᵢ)²)</td>
+                    <td>How far apart two points are. Smaller distance = more similar objects.</td>
+                </tr>
+                <tr>
+                    <td><strong>Direction</strong></td>
+                    <td>Unit vector: v/||v||</td>
+                    <td>The orientation of a vector. Relationships are encoded as consistent directions (e.g., male→female).</td>
+                </tr>
+                <tr>
+                    <td><strong>Angle</strong></td>
+                    <td>cos(θ) = (a · b) / (||a|| ||b||)</td>
+                    <td>How aligned two vectors are. Small angle = similar meaning, regardless of magnitude.</td>
+                </tr>
+            </table>
+
+            <h3>Visualizing High-Dimensional Spaces</h3>
+
+            <p>Embedding spaces typically have 100-1024 dimensions, which is impossible to visualize directly. However, we can understand them through 2D/3D projections and mathematical properties.</p>
+
+            <h4>Example: 2D Projection of Word Embeddings</h4>
+
+            <p>Imagine we project 300-dimensional word embeddings down to 2D for visualization (using techniques like t-SNE or PCA):</p>
+
+            <table class="regular-table">
+                <tr>
+                    <th>Word</th>
+                    <th>2D Projection</th>
+                    <th>Nearby Words</th>
+                    <th>Cluster</th>
+                </tr>
+                <tr>
+                    <td><strong>king</strong></td>
+                    <td>[0.8, 0.9]</td>
+                    <td>queen, prince, monarch</td>
+                    <td>Royalty</td>
+                </tr>
+                <tr>
+                    <td><strong>doctor</strong></td>
+                    <td>[0.3, 0.7]</td>
+                    <td>nurse, surgeon, physician</td>
+                    <td>Medical Professionals</td>
+                </tr>
+                <tr>
+                    <td><strong>apple</strong></td>
+                    <td>[-0.5, 0.2]</td>
+                    <td>orange, banana, fruit</td>
+                    <td>Fruits</td>
+                </tr>
+                <tr>
+                    <td><strong>car</strong></td>
+                    <td>[-0.3, -0.6]</td>
+                    <td>truck, vehicle, automobile</td>
+                    <td>Vehicles</td>
+                </tr>
+            </table>
+
+            <p>Notice how semantically similar words cluster together in the space. This clustering emerges automatically from training—the model was never told that "king" and "queen" are related!</p>
+
+            <h3>Vector Operations and Their Meanings</h3>
+
+            <h4>1. Vector Addition: Combining Concepts</h4>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Example: "king" + "woman"</div>
+                <div class="transform-step-content">
+                    king = [0.95, 0.93] (high royalty, high masculinity)<br/>
+                    woman = [0.09, 0.11] (low royalty, low masculinity)<br/>
+                    king + woman = [1.04, 1.04] (combines both concepts)<br/>
+                    Nearest word: "queen" (high royalty, low masculinity)<br/>
+                    Meaning: Combining the concepts of royalty and femininity
+                </div>
+            </div>
+
+            <h4>2. Vector Subtraction: Isolating Differences</h4>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Example: "king" - "man"</div>
+                <div class="transform-step-content">
+                    king = [0.95, 0.93]<br/>
+                    man = [0.12, 0.89]<br/>
+                    king - man = [0.83, 0.04] (isolates "royalty" concept)<br/>
+                    Meaning: Removing the gender aspect, leaving the royalty aspect
+                </div>
+            </div>
+
+            <h4>3. Dot Product: Measuring Similarity</h4>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Example: "cat" · "dog"</div>
+                <div class="transform-step-content">
+                    cat = [0.72, 0.18, -0.34]<br/>
+                    dog = [0.69, 0.21, -0.31]<br/>
+                    cat · dog = (0.72)(0.69) + (0.18)(0.21) + (-0.34)(-0.31) = 0.64<br/>
+                    High dot product = similar vectors = similar meanings
+                </div>
+            </div>
+
+            <div class="concept-box">
+                <h4>Why Does Geometry Capture Semantics?</h4>
+                <p>The training objective creates this geometric structure. When we train embeddings to predict context (Word2Vec) or co-occurrence (GloVe), words that are used similarly end up close together. The loss function essentially says: "If two words can substitute for each other in sentences, make their embeddings similar." Over millions of examples, this creates a space where geometric relationships mirror semantic relationships.</p>
+            </div>
+        </section>
+
+        <section id="similarity-measures" class="content-section">
+            <h1>Similarity Measures</h1>
+
+            <h2>Quantifying Similarity in Embedding Spaces</h2>
+            
+            <p>Once we have embeddings, we need ways to measure how similar two embeddings are. Different similarity measures capture different aspects of similarity, and choosing the right one depends on your application.</p>
+
+            <h3>The Three Main Similarity Measures</h3>
+
+            <table class="regular-table">
+                <tr>
+                    <th style="width: 20%;">Measure</th>
+                    <th style="width: 30%;">Formula</th>
+                    <th style="width: 25%;">Range</th>
+                    <th>When to Use</th>
+                </tr>
+                <tr>
+                    <td><strong>Euclidean Distance</strong></td>
+                    <td>d(a,b) = √(Σ(aᵢ - bᵢ)²)</td>
+                    <td>[0, ∞)<br/>0 = identical</td>
+                    <td>When magnitude matters (e.g., comparing vectors of similar scale)</td>
+                </tr>
+                <tr>
+                    <td><strong>Cosine Similarity</strong></td>
+                    <td>cos(θ) = (a · b) / (||a|| ||b||)</td>
+                    <td>[-1, 1]<br/>1 = identical direction</td>
+                    <td>When direction matters more than magnitude (most common for embeddings)</td>
+                </tr>
+                <tr>
+                    <td><strong>Dot Product</strong></td>
+                    <td>a · b = Σ(aᵢ × bᵢ)</td>
+                    <td>(-∞, ∞)<br/>Higher = more similar</td>
+                    <td>When both direction and magnitude matter (e.g., ranking by relevance)</td>
+                </tr>
+            </table>
+
+            <h3>Worked Example: Computing All Three Measures</h3>
+
+            <p>Let's compute similarity between "cat" and "dog" embeddings using all three measures:</p>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Given Embeddings (3D for simplicity)</div>
+                <div class="transform-step-content">
+                    cat = [0.8, 0.2, -0.4]<br/>
+                    dog = [0.7, 0.3, -0.3]<br/>
+                    (Real embeddings have 100-1024 dimensions, but the math is the same)
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">1. Euclidean Distance</div>
+                <div class="transform-step-content">
+                    d = √((0.8-0.7)² + (0.2-0.3)² + (-0.4-(-0.3))²)<br/>
+                    d = √(0.01 + 0.01 + 0.01) = √0.03 = 0.173<br/>
+                    <strong>Interpretation:</strong> Small distance (close to 0) means very similar
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">2. Cosine Similarity</div>
+                <div class="transform-step-content">
+                    Numerator (dot product): (0.8)(0.7) + (0.2)(0.3) + (-0.4)(-0.3) = 0.56 + 0.06 + 0.12 = 0.74<br/>
+                    ||cat|| = √(0.8² + 0.2² + 0.4²) = √0.84 = 0.917<br/>
+                    ||dog|| = √(0.7² + 0.3² + 0.3²) = √0.67 = 0.819<br/>
+                    cos(θ) = 0.74 / (0.917 × 0.819) = 0.74 / 0.751 = 0.985<br/>
+                    <strong>Interpretation:</strong> Very close to 1 means nearly identical direction (very similar)
+                </div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">3. Dot Product</div>
+                <div class="transform-step-content">
+                    a · b = (0.8)(0.7) + (0.2)(0.3) + (-0.4)(-0.3) = 0.74<br/>
+                    <strong>Interpretation:</strong> Positive and relatively large means similar and both have significant magnitude
+                </div>
+            </div>
+
+            <h3>Comparing Different Word Pairs</h3>
+
+            <table class="regular-table">
+                <tr>
+                    <th>Word Pair</th>
+                    <th>Euclidean Distance</th>
+                    <th>Cosine Similarity</th>
+                    <th>Relationship</th>
+                </tr>
+                <tr>
+                    <td><strong>cat, dog</strong></td>
+                    <td>0.173 (close)</td>
+                    <td>0.985 (very similar)</td>
+                    <td>Both are common pets, similar contexts</td>
+                </tr>
+                <tr>
+                    <td><strong>cat, kitten</strong></td>
+                    <td>0.245 (close)</td>
+                    <td>0.972 (very similar)</td>
+                    <td>Adult and baby of same species</td>
+                </tr>
+                <tr>
+                    <td><strong>cat, car</strong></td>
+                    <td>1.523 (far)</td>
+                    <td>0.234 (dissimilar)</td>
+                    <td>Completely unrelated concepts</td>
+                </tr>
+                <tr>
+                    <td><strong>king, queen</strong></td>
+                    <td>0.189 (close)</td>
+                    <td>0.978 (very similar)</td>
+                    <td>Same role, different gender</td>
+                </tr>
+            </table>
+
+            <h3>Which Measure to Use?</h3>
+
+            <p><strong>Cosine Similarity (Most Common):</strong> Use when you care about the direction/orientation of vectors, not their magnitude. This is standard for text embeddings because longer documents naturally have larger embedding magnitudes, but we want to compare meaning, not length.</p>
+
+            <p><strong>Euclidean Distance:</strong> Use when magnitude is meaningful. For example, in image embeddings where magnitude might encode brightness or intensity.</p>
+
+            <p><strong>Dot Product:</strong> Use in ranking/retrieval systems where you want to favor both similarity AND confidence (larger magnitude = more confident representation).</p>
+
+            <div class="concept-box">
+                <h4>Normalization Matters</h4>
+                <p>Many embedding systems normalize all vectors to unit length (||v|| = 1). When vectors are normalized, cosine similarity and dot product become equivalent! This is why you'll often see embeddings normalized before use—it simplifies similarity computation and makes different measures interchangeable.</p>
+            </div>
+        </section>
+
+        <section id="glove" class="content-section">
+            <h1>GloVe: Global Vectors for Word Representation</h1>
+
+            <h2>A Different Approach to Word Embeddings</h2>
+            
+            <p>While Word2Vec learns embeddings by predicting context words, GloVe (Global Vectors) takes a different approach: it learns embeddings by factorizing a word co-occurrence matrix. Developed by researchers at Stanford in 2014, GloVe combines the benefits of global statistics (like LSA) with the predictive power of neural methods (like Word2Vec).</p>
+
+            <div class="intro-box">
+                <p><strong>Core Idea:</strong> Words that frequently appear together should have similar embeddings. GloVe captures this by analyzing how often words co-occur across the entire corpus, then learning embeddings that reflect these co-occurrence patterns.</p>
+            </div>
+
+            <h3>How GloVe Works: Step-by-Step</h3>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Step 1: Build Co-occurrence Matrix</div>
+                <div class="transform-step-content">
+                    Count how often words appear together within a context window:<br/>
+                    Corpus: "I like cats. I like dogs. Cats and dogs are pets."<br/>
+                    X["like"]["cats"] = 1 (appear together once)<br/>
+                    X["like"]["dogs"] = 1 (appear together once)<br/>
+                    X["cats"]["dogs"] = 1 (appear together once)<br/>
+                    This creates a matrix X where Xᵢⱼ = how often word i appears with word j
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Step 2: Define Training Objective</div>
+                <div class="transform-step-content">
+                    Goal: Learn word vectors wᵢ such that their dot product approximates log co-occurrence:<br/>
+                    wᵢ · wⱼ + bᵢ + bⱼ ≈ log(Xᵢⱼ)<br/>
+                    Where bᵢ, bⱼ are bias terms<br/>
+                    Intuition: If words co-occur frequently, their embeddings should have a large dot product
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Step 3: Weighted Least Squares</div>
+                <div class="transform-step-content">
+                    Loss function: J = Σ f(Xᵢⱼ) (wᵢ · wⱼ + bᵢ + bⱼ - log(Xᵢⱼ))²<br/>
+                    f(Xᵢⱼ) is a weighting function that prevents very common words from dominating<br/>
+                    Minimize this loss using gradient descent to learn optimal embeddings
+                </div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Step 4: Extract Final Embeddings</div>
+                <div class="transform-step-content">
+                    After training, each word has two vectors: wᵢ (word vector) and w̃ᵢ (context vector)<br/>
+                    Final embedding: (wᵢ + w̃ᵢ) / 2 (average of both)<br/>
+                    These embeddings capture global co-occurrence statistics
+                </div>
+            </div>
+
+            <h3>GloVe vs Word2Vec</h3>
+
+            <table class="regular-table">
+                <tr>
+                    <th style="width: 25%;">Aspect</th>
+                    <th>Word2Vec</th>
+                    <th>GloVe</th>
+                </tr>
+                <tr>
+                    <td><strong>Training Method</strong></td>
+                    <td>Predictive: Predict context from target word</td>
+                    <td>Count-based: Factorize co-occurrence matrix</td>
+                </tr>
+                <tr>
+                    <td><strong>Information Used</strong></td>
+                    <td>Local context windows</td>
+                    <td>Global corpus statistics</td>
+                </tr>
+                <tr>
+                    <td><strong>Training Speed</strong></td>
+                    <td>Fast (online learning, one pass)</td>
+                    <td>Slower (requires building co-occurrence matrix first)</td>
+                </tr>
+                <tr>
+                    <td><strong>Memory</strong></td>
+                    <td>Low (only stores embeddings)</td>
+                    <td>High (stores large co-occurrence matrix)</td>
+                </tr>
+                <tr>
+                    <td><strong>Performance</strong></td>
+                    <td>Excellent on analogies and similarity</td>
+                    <td>Slightly better on some tasks, similar overall</td>
+                </tr>
+                <tr>
+                    <td><strong>Interpretability</strong></td>
+                    <td>Less interpretable (neural network)</td>
+                    <td>More interpretable (based on co-occurrence statistics)</td>
+                </tr>
+            </table>
+
+            <p>In practice, both Word2Vec and GloVe produce high-quality embeddings, and the choice often comes down to computational resources and specific task requirements.</p>
+        </section>
+
+        <section id="fasttext" class="content-section">
+            <h1>FastText: Subword Embeddings</h1>
+
+            <h2>Handling Unknown Words and Morphology</h2>
+            
+            <p>Word2Vec and GloVe have a critical limitation: they can't handle words not seen during training (out-of-vocabulary or OOV words). If your model was trained on "running" but encounters "ultrarunning", it has no embedding for it. FastText, developed by Facebook AI in 2016, solves this by representing words as bags of character n-grams (subwords).</p>
+
+            <div class="intro-box">
+                <p><strong>Core Innovation:</strong> Instead of treating each word as an atomic unit, FastText breaks words into character n-grams. The word "running" becomes: &lt;ru, run, unn, nni, nin, ing, ng&gt;. The embedding for "running" is the sum of embeddings for all its n-grams. This allows FastText to generate embeddings for unseen words by combining n-grams it has seen.</p>
+            </div>
+
+            <h3>How FastText Works: Step-by-Step</h3>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Step 1: Generate Character N-grams</div>
+                <div class="transform-step-content">
+                    Word: "running" (with boundary markers &lt; and &gt;)<br/>
+                    3-grams: &lt;ru, run, unn, nni, nin, ing, ng&gt;<br/>
+                    4-grams: &lt;run, runn, unni, nnin, ning, ing&gt;<br/>
+                    Also include the full word: &lt;running&gt;<br/>
+                    Total: All n-grams from n=3 to n=6 (typical range)
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Step 2: Learn N-gram Embeddings</div>
+                <div class="transform-step-content">
+                    Train using Skip-gram objective (like Word2Vec):<br/>
+                    Each n-gram gets its own embedding vector:<br/>
+                    "run" → [0.23, -0.45, 0.67, ..., 0.12]<br/>
+                    "ing" → [-0.12, 0.34, -0.23, ..., 0.56]<br/>
+                    "unn" → [0.45, -0.23, 0.12, ..., -0.34]<br/>
+                    These are learned to predict context words
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Step 3: Compute Word Embedding</div>
+                <div class="transform-step-content">
+                    Word embedding = Sum of all its n-gram embeddings:<br/>
+                    "running" = embedding(&lt;ru) + embedding(run) + ... + embedding(ng&gt;) + embedding(&lt;running&gt;)<br/>
+                    This creates a rich representation that captures morphology
+                </div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Step 4: Handle Unknown Words</div>
+                <div class="transform-step-content">
+                    New word: "ultrarunning" (never seen in training)<br/>
+                    N-grams: &lt;ul, ult, ltr, tra, rar, aru, run, unn, nni, nin, ing, ng&gt;<br/>
+                    Many of these n-grams were seen in other words!<br/>
+                    "ultrarunning" = sum of embeddings for its n-grams<br/>
+                    Result: Reasonable embedding even though the word is new
+                </div>
+            </div>
+
+            <h3>Advantages of FastText</h3>
+
+            <p><strong>1. Handles Rare and Unknown Words:</strong> Even if a word appears only once or never in training, FastText can generate an embedding by combining n-grams from similar words.</p>
+
+            <p><strong>2. Captures Morphology:</strong> Words with similar morphology ("run", "running", "runner", "runs") share many n-grams, so their embeddings are naturally similar. This is especially valuable for morphologically rich languages (German, Turkish, Finnish).</p>
+
+            <p><strong>3. Robust to Typos:</strong> A typo like "runing" (missing 'n') shares most n-grams with "running", so its embedding is still close to the correct word.</p>
+
+            <h3>FastText vs Word2Vec</h3>
+
+            <table class="regular-table">
+                <tr>
+                    <th style="width: 25%;">Aspect</th>
+                    <th>Word2Vec</th>
+                    <th>FastText</th>
+                </tr>
+                <tr>
+                    <td><strong>Vocabulary</strong></td>
+                    <td>Fixed (can't handle OOV words)</td>
+                    <td>Open (generates embeddings for any word)</td>
+                </tr>
+                <tr>
+                    <td><strong>Morphology</strong></td>
+                    <td>Ignores word structure</td>
+                    <td>Captures prefixes, suffixes, roots</td>
+                </tr>
+                <tr>
+                    <td><strong>Training Speed</strong></td>
+                    <td>Fast</td>
+                    <td>Slower (more n-grams to process)</td>
+                </tr>
+                <tr>
+                    <td><strong>Memory</strong></td>
+                    <td>Low (one vector per word)</td>
+                    <td>Higher (vectors for all n-grams)</td>
+                </tr>
+                <tr>
+                    <td><strong>Best For</strong></td>
+                    <td>Clean text, common words, English</td>
+                    <td>Rare words, typos, morphologically rich languages</td>
+                </tr>
+            </table>
+
+            <div class="concept-box">
+                <h4>Real-World Impact: Multilingual NLP</h4>
+                <p>FastText has been particularly impactful for languages with rich morphology. In German, compound words like "Donaudampfschifffahrtsgesellschaft" (Danube steamship company) are common but rare in text. Word2Vec would have no embedding for this, but FastText breaks it into n-grams and generates a reasonable embedding. Facebook has released pre-trained FastText embeddings for 157 languages, democratizing NLP for low-resource languages.</p>
+            </div>
+        </section>
+
+        <section id="nlp-applications" class="content-section">
+            <h1>Natural Language Processing Applications</h1>
+
+            <h2>How Embeddings Power Modern NLP</h2>
+            
+            <p>Embeddings are the foundation of virtually every modern NLP system. From search engines to chatbots to machine translation, embeddings enable machines to understand and generate human language. Let's explore the key applications.</p>
+
+            <h3>1. Semantic Search</h3>
+            
+            <p>Traditional keyword search fails when queries use different words than documents. Embeddings enable semantic search: finding documents by meaning, not just keywords.</p>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Query: "How to fix a leaky faucet"</div>
+                <div class="transform-step-content">
+                    Embed query: [0.45, -0.23, 0.67, ..., 0.12]<br/>
+                    This captures the meaning: home repair, plumbing, water problem
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Document 1: "Repairing dripping taps"</div>
+                <div class="transform-step-content">
+                    Embed document: [0.43, -0.25, 0.69, ..., 0.10]<br/>
+                    Cosine similarity with query: 0.94 (very similar!)<br/>
+                    Even though it uses different words ("repairing" vs "fix", "dripping taps" vs "leaky faucet")
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Document 2: "Installing a new dishwasher"</div>
+                <div class="transform-step-content">
+                    Embed document: [0.12, 0.56, -0.34, ..., 0.78]<br/>
+                    Cosine similarity with query: 0.32 (not very similar)<br/>
+                    Correctly identified as less relevant despite containing "fix" in full text
+                </div>
+            </div>
+
+            <p>Google Search, Bing, and other search engines use embeddings to understand query intent and retrieve semantically relevant results.</p>
+
+            <h3>2. Sentiment Analysis</h3>
+            
+            <p>Determining whether text expresses positive, negative, or neutral sentiment is crucial for social media monitoring, customer feedback analysis, and brand management.</p>
+
+            <p>Embeddings capture sentiment through training. Words like "excellent", "amazing", "love" end up close together in embedding space, while "terrible", "awful", "hate" cluster separately. A sentiment classifier trained on embeddings can generalize to new expressions of sentiment.</p>
+
+            <h3>3. Machine Translation</h3>
+            
+            <p>Modern translation systems (Google Translate, DeepL) use embeddings to represent sentences in a language-agnostic space. The process:</p>
+
+            <ol>
+                <li><strong>Encoder:</strong> Convert source sentence to embedding (captures meaning)</li>
+                <li><strong>Cross-lingual Space:</strong> Embedding represents meaning independent of language</li>
+                <li><strong>Decoder:</strong> Generate target sentence from embedding</li>
+            </ol>
+
+            <p>This enables zero-shot translation: translating between language pairs never seen together in training!</p>
+
+            <h3>4. Question Answering</h3>
+            
+            <p>Systems like ChatGPT, Alexa, and customer service bots use embeddings to understand questions and retrieve or generate answers.</p>
+
+            <table class="regular-table">
+                <tr>
+                    <th>Question</th>
+                    <th>Embedding Captures</th>
+                    <th>System Response</th>
+                </tr>
+                <tr>
+                    <td>"What's the capital of France?"</td>
+                    <td>Query type: factual, Topic: geography, Entity: France</td>
+                    <td>Retrieve fact: "Paris"</td>
+                </tr>
+                <tr>
+                    <td>"How do I reset my password?"</td>
+                    <td>Query type: how-to, Topic: account management, Intent: troubleshooting</td>
+                    <td>Retrieve instructions or guide user through steps</td>
+                </tr>
+                <tr>
+                    <td>"Why is the sky blue?"</td>
+                    <td>Query type: explanation, Topic: science, Concept: atmospheric optics</td>
+                    <td>Generate or retrieve explanation about Rayleigh scattering</td>
+                </tr>
+            </table>
+
+            <h3>5. Text Classification</h3>
+            
+            <p>Categorizing documents (news articles, emails, support tickets) is a fundamental NLP task. Embeddings enable accurate classification with minimal labeled data through transfer learning.</p>
+
+            <p>Example: Email spam detection. Instead of hand-crafting features ("contains 'free'", "has many exclamation marks"), use pre-trained embeddings and train a simple classifier on 1,000 labeled emails. The embeddings already understand language, so the classifier just needs to learn what patterns indicate spam.</p>
+        </section>
+
+        <section id="recommendation" class="content-section">
+            <h1>Recommendation Systems with Embeddings</h1>
+
+            <h2>From Collaborative Filtering to Embedding-Based Recommendations</h2>
+            
+            <p>Recommendation systems power Netflix, Spotify, Amazon, YouTube, and countless other platforms. Embeddings have revolutionized recommendations by enabling systems to understand both users and items in a unified space.</p>
+
+            <div class="intro-box">
+                <p><strong>Key Insight:</strong> If we embed both users and items (movies, songs, products) in the same vector space, we can recommend items by finding those closest to a user's embedding. Items a user likes should be close to that user in embedding space.</p>
+            </div>
+
+            <h3>How Embedding-Based Recommendations Work</h3>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Step 1: Learn Item Embeddings</div>
+                <div class="transform-step-content">
+                    Train embeddings for all items based on user interactions:<br/>
+                    "The Matrix" → [0.72, 0.18, -0.34, ..., 0.45] (sci-fi, action, philosophical)<br/>
+                    "Inception" → [0.69, 0.21, -0.31, ..., 0.42] (similar to Matrix)<br/>
+                    "The Notebook" → [-0.23, 0.67, 0.45, ..., -0.12] (romance, drama)<br/>
+                    Items watched by similar users get similar embeddings
+                </div>
+            </div>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">Step 2: Learn User Embeddings</div>
+                <div class="transform-step-content">
+                    User embedding = Average of embeddings of items they liked:<br/>
+                    User A liked: [The Matrix, Inception, Interstellar]<br/>
+                    User A embedding = (Matrix + Inception + Interstellar) / 3<br/>
+                    User A embedding ≈ [0.70, 0.19, -0.32, ..., 0.43] (likes sci-fi)<br/>
+                    This captures the user's preferences
+                </div>
+            </div>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">Step 3: Generate Recommendations</div>
+                <div class="transform-step-content">
+                    Find items closest to user embedding:<br/>
+                    Compute cosine similarity between User A and all unwatched movies<br/>
+                    "Blade Runner" embedding: [0.68, 0.22, -0.30, ..., 0.40]<br/>
+                    Similarity with User A: 0.96 (very high!)<br/>
+                    Recommend "Blade Runner" to User A
+                </div>
+            </div>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Step 4: Handle Cold Start</div>
+                <div class="transform-step-content">
+                    New user with no history? Use content-based embeddings:<br/>
+                    User says they like "action movies"<br/>
+                    Embed "action movies" text description<br/>
+                    Find movies with similar embeddings<br/>
+                    This solves the cold-start problem!
+                </div>
+            </div>
+
+            <h3>Real-World Example: Spotify</h3>
+
+            <p>Spotify embeds both songs and users in the same space. A user's embedding is influenced by:</p>
+            <ul>
+                <li>Songs they've listened to (and how much)</li>
+                <li>Songs they've skipped</li>
+                <li>Songs they've added to playlists</li>
+                <li>Audio features of songs they like (tempo, energy, acousticness)</li>
+                <li>Lyrics and metadata (genre, artist, era)</li>
+            </ul>
+
+            <p>When you open Spotify, it computes similarity between your user embedding and millions of song embeddings in real-time, generating personalized recommendations in milliseconds.</p>
+
+            <h3>Advantages Over Traditional Methods</h3>
+
+            <table class="regular-table">
+                <tr>
+                    <th style="width: 30%;">Traditional Collaborative Filtering</th>
+                    <th>Embedding-Based Recommendations</th>
+                </tr>
+                <tr>
+                    <td>Requires explicit user-item matrix (sparse)</td>
+                    <td>Works with any interaction data (clicks, views, time spent)</td>
+                </tr>
+                <tr>
+                    <td>Struggles with new items (cold start)</td>
+                    <td>Can use content embeddings for new items</td>
+                </tr>
+                <tr>
+                    <td>Doesn't capture item features</td>
+                    <td>Embeddings capture both collaborative and content signals</td>
+                </tr>
+                <tr>
+                    <td>Computationally expensive for large catalogs</td>
+                    <td>Fast approximate nearest neighbor search in embedding space</td>
+                </tr>
+                <tr>
+                    <td>Hard to explain recommendations</td>
+                    <td>Can analyze embedding dimensions to understand why items are recommended</td>
+                </tr>
+            </table>
+
+            <div class="concept-box">
+                <h4>Multi-Modal Embeddings</h4>
+                <p>Modern recommendation systems use multi-modal embeddings that combine multiple data types. For movies: visual embeddings from movie posters and trailers, text embeddings from plot summaries and reviews, audio embeddings from soundtracks, and metadata embeddings from genre/cast/director. All these are combined into a single unified embedding that captures every aspect of the movie. This enables recommendations based on "movies that look and feel like X" rather than just "movies watched by similar users."</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Windows -->
+    <div id="modal-deeper-dive" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-deeper-dive')">&times;</span>
+            <h2 class="modal-title">Deeper Dive: Advanced Embedding Concepts</h2>
+            <div class="modal-body">
+                <p>This tutorial includes several deeper dive sections accessible through modal windows. These provide additional technical details, mathematical foundations, and advanced applications for readers who want to go beyond the core concepts.</p>
+                
+                <h3>Available Deeper Dives:</h3>
+                <ul>
+                    <li><strong>Vector Arithmetic:</strong> Mathematical foundations of embedding operations</li>
+                    <li><strong>Transfer Learning in Bioinformatics:</strong> How pre-trained models revolutionize biological research</li>
+                    <li><strong>AlphaFold and Protein Structure:</strong> How embeddings enable protein structure prediction</li>
+                    <li><strong>Molecule Generation:</strong> Using embeddings to design new drugs</li>
+                    <li><strong>Privacy-Preserving Clinical Embeddings:</strong> Protecting patient data while enabling AI</li>
+                    <li><strong>Computational Efficiency:</strong> Why embeddings are faster than traditional methods</li>
+                    <li><strong>Word2Vec Architecture Details:</strong> Complete neural network architecture and training</li>
+                </ul>
+                
+                <p>Look for blue underlined links throughout the tutorial to access these deeper dives!</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-vector-arithmetic" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-vector-arithmetic')">&times;</span>
+            <h2 class="modal-title">Vector Arithmetic and Analogies</h2>
+            <div class="modal-body">
+                <h3>Why Does "king - man + woman ≈ queen" Work?</h3>
+                
+                <p>The famous word embedding analogy isn't magic—it's a consequence of how embeddings encode relationships as vector directions. Let's break down the mathematics:</p>
+                
+                <h4>The Mathematical Foundation</h4>
+                <p>When we train embeddings, words that share similar relationships end up having similar vector offsets. The relationship "male to female" is encoded as a consistent direction in the embedding space.</p>
+                
+                <p><strong>Step 1:</strong> Calculate the "gender" vector by subtracting a male word from its female counterpart:</p>
+                <p>gender_vector = woman - man = [0.09, 0.11] - [0.12, 0.89] = [-0.03, -0.78]</p>
+                
+                <p><strong>Step 2:</strong> Apply this transformation to another male word:</p>
+                <p>king + gender_vector = [0.95, 0.93] + [-0.03, -0.78] = [0.92, 0.15]</p>
+                
+                <p><strong>Step 3:</strong> Find the nearest word to [0.92, 0.15]:</p>
+                <p>queen = [0.97, 0.08] is the closest word in the vocabulary!</p>
+                
+                <h4>Why This Works</h4>
+                <p>During training, the model sees many examples of male-female word pairs in similar contexts:</p>
+                <ul>
+                    <li>"The king and his queen" → king and queen appear together</li>
+                    <li>"The man and his woman" → man and woman appear together</li>
+                    <li>"The actor and his actress" → actor and actress appear together</li>
+                </ul>
+                
+                <p>The model learns that the transformation from male to female words is consistent across different contexts, so it encodes this as a consistent vector direction. This same principle applies to other relationships:</p>
+                <ul>
+                    <li>Country-Capital: Paris - France + Germany ≈ Berlin</li>
+                    <li>Verb Tense: walking - walk + swim ≈ swimming</li>
+                    <li>Comparative-Superlative: better - good + bad ≈ worst</li>
+                </ul>
+                
+                <h4>Limitations</h4>
+                <p>While impressive, these analogies aren't perfect. They work best for relationships that are consistently expressed in the training data. Rare or context-dependent relationships may not be captured as cleanly.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-transfer-learning-bio" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-transfer-learning-bio')">&times;</span>
+            <h2 class="modal-title">Transfer Learning in Bioinformatics</h2>
+            <div class="modal-body">
+                <h3>From General to Specific: The Power of Pre-trained Biological Embeddings</h3>
+                
+                <p>Transfer learning has revolutionized bioinformatics by enabling researchers to leverage knowledge learned from massive datasets for specialized tasks with limited data.</p>
+                
+                <h4>The Transfer Learning Pipeline</h4>
+                
+                <p><strong>Phase 1: Pre-training (Done Once, Shared Globally)</strong></p>
+                <p>A large model is trained on massive datasets:</p>
+                <ul>
+                    <li><strong>ProtBERT:</strong> Trained on 200 million protein sequences from UniProt</li>
+                    <li><strong>DNABERT:</strong> Trained on the human genome (3 billion base pairs)</li>
+                    <li><strong>Mol2Vec:</strong> Trained on millions of chemical compounds from PubChem</li>
+                </ul>
+                
+                <p>This pre-training teaches the model general patterns: which amino acids tend to appear together, which DNA motifs are common, which molecular substructures are frequent.</p>
+                
+                <p><strong>Phase 2: Fine-tuning (Done by Each Researcher)</strong></p>
+                <p>Researchers take the pre-trained model and fine-tune it on their specific task:</p>
+                <ul>
+                    <li>Predicting enzyme function from sequence (needs ~5,000 labeled examples)</li>
+                    <li>Identifying disease-causing mutations (needs ~10,000 labeled variants)</li>
+                    <li>Predicting drug-target binding (needs ~20,000 compound-protein pairs)</li>
+                </ul>
+                
+                <p>Without transfer learning, these tasks would require millions of labeled examples. With pre-trained embeddings, thousands suffice because the model already understands the "language" of biology—it just needs to learn the specific task.</p>
+                
+                <h4>Real-World Success Story: AlphaFold</h4>
+                <p>AlphaFold, which won the 2021 Nobel Prize in Chemistry for protein structure prediction, uses embeddings extensively:</p>
+                <ol>
+                    <li>Protein sequences are embedded using a transformer model pre-trained on millions of sequences</li>
+                    <li>These embeddings capture evolutionary information (which amino acids co-evolve)</li>
+                    <li>The embeddings are fed into a structure prediction network</li>
+                    <li>Result: Accurate 3D structure prediction for proteins that have never been crystallized</li>
+                </ol>
+                
+                <p>This would have been impossible without transfer learning—there aren't enough experimentally determined structures to train from scratch.</p>
+                
+                <h4>Why It Works in Biology</h4>
+                <p>Biological sequences follow "grammar rules" just like natural language:</p>
+                <ul>
+                    <li>Certain amino acids prefer to be near each other (hydrophobic residues cluster together)</li>
+                    <li>Certain DNA motifs signal regulatory elements (TATA box, CAAT box)</li>
+                    <li>Certain chemical groups confer specific properties (hydroxyl groups increase solubility)</li>
+                </ul>
+                
+                <p>Pre-trained embeddings learn these rules from vast amounts of unlabeled data, then apply them to specific tasks.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-protein-structure" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-protein-structure')">&times;</span>
+            <h2 class="modal-title">Embeddings in AlphaFold: Predicting Protein Structure</h2>
+            <div class="modal-body">
+                <h3>How AlphaFold Uses Embeddings to Solve the Protein Folding Problem</h3>
+                
+                <p>Predicting how a protein folds from its amino acid sequence is one of biology's grand challenges. AlphaFold, developed by DeepMind, uses embeddings as a core component of its solution.</p>
+                
+                <h4>The Protein Folding Problem</h4>
+                <p>A protein is a linear chain of amino acids that folds into a specific 3D structure. This structure determines the protein's function. Traditionally, determining structure required expensive X-ray crystallography or cryo-EM, taking months to years per protein.</p>
+                
+                <p>AlphaFold can predict structure from sequence alone in minutes, with accuracy rivaling experimental methods.</p>
+                
+                <h4>How AlphaFold Uses Embeddings</h4>
+                
+                <p><strong>Step 1: Sequence Embedding</strong></p>
+                <p>The input protein sequence is embedded using a transformer model similar to BERT:</p>
+                <p>Sequence: MKTAYIAKQRQISFVK... → Embedding: [0.23, -0.45, 0.89, ..., 0.12] per amino acid</p>
+                
+                <p><strong>Step 2: Evolutionary Information</strong></p>
+                <p>AlphaFold searches for similar sequences across all known proteins (multiple sequence alignment). Amino acids that co-evolve across species are likely to be close in 3D space. This information is encoded in the embeddings.</p>
+                
+                <p><strong>Step 3: Pair Representation</strong></p>
+                <p>For every pair of amino acids (i, j), AlphaFold creates a "pair embedding" that predicts their relationship:</p>
+                <ul>
+                    <li>Will they be close in 3D space?</li>
+                    <li>Will they form a hydrogen bond?</li>
+                    <li>What will be the distance and angle between them?</li>
+                </ul>
+                
+                <p><strong>Step 4: Structure Prediction</strong></p>
+                <p>The embeddings are fed into a neural network that iteratively refines a 3D structure, adjusting atom positions until the structure is consistent with the predicted pair relationships.</p>
+                
+                <h4>Why Embeddings Are Essential</h4>
+                <p>Without embeddings, AlphaFold would need to process raw sequences and evolutionary data directly, which is computationally intractable. Embeddings compress this information into dense vectors that capture the essential patterns, making the problem solvable.</p>
+                
+                <p>The embeddings learn to recognize:</p>
+                <ul>
+                    <li>Secondary structure patterns (alpha helices, beta sheets)</li>
+                    <li>Hydrophobic/hydrophilic regions</li>
+                    <li>Evolutionary constraints (which residues can't change without breaking function)</li>
+                    <li>Long-range interactions (residues far apart in sequence but close in 3D)</li>
+                </ul>
+                
+                <h4>Impact</h4>
+                <p>AlphaFold has predicted structures for over 200 million proteins—essentially all known proteins. This has accelerated drug discovery, enzyme engineering, and our understanding of disease mechanisms. Embeddings made this revolution possible.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-molecule-generation" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-molecule-generation')">&times;</span>
+            <h2 class="modal-title">Generating New Molecules with Embeddings</h2>
+            <div class="modal-body">
+                <h3>From Screening to Design: Creating Novel Drug Candidates</h3>
+                
+                <p>Beyond screening existing molecules, embeddings enable generating entirely new molecules with desired properties—a process called de novo drug design.</p>
+                
+                <h4>The Generative Approach</h4>
+                
+                <p><strong>Step 1: Learn the Molecular Embedding Space</strong></p>
+                <p>Train a model (often a Variational Autoencoder or VAE) to map molecules to embeddings and back:</p>
+                <ul>
+                    <li>Encoder: Molecule (SMILES) → Embedding [0.23, -0.45, ..., 0.12]</li>
+                    <li>Decoder: Embedding [0.23, -0.45, ..., 0.12] → Molecule (SMILES)</li>
+                </ul>
+                
+                <p><strong>Step 2: Navigate the Embedding Space</strong></p>
+                <p>Once trained, the embedding space becomes a "map" of all possible molecules. Similar molecules are close together, and we can navigate this space to find molecules with desired properties.</p>
+                
+                <p><strong>Step 3: Optimize for Target Properties</strong></p>
+                <p>Define target properties (e.g., "binds to protein X", "low toxicity", "high solubility") and search the embedding space for regions that satisfy these constraints.</p>
+                
+                <p>For example:</p>
+                <ul>
+                    <li>Start with a known drug: Aspirin → embedding [0.72, 0.18]</li>
+                    <li>Move in the direction of "increased potency": [0.72, 0.18] + [0.05, 0.02] = [0.77, 0.20]</li>
+                    <li>Decode back to a molecule: New SMILES string representing a novel compound</li>
+                    <li>Synthesize and test this new compound in the lab</li>
+                </ul>
+                
+                <p><strong>Step 4: Iterative Refinement</strong></p>
+                <p>Test the generated molecules, measure their properties, and use this feedback to refine the search direction in embedding space.</p>
+                
+                <h4>Real-World Success</h4>
+                <p>In 2019, researchers used generative models with embeddings to design new antibiotics. They:</p>
+                <ol>
+                    <li>Trained embeddings on 2,500 known antibacterial compounds</li>
+                    <li>Generated 6,000 novel molecules by navigating embedding space</li>
+                    <li>Computationally screened them for antibacterial activity</li>
+                    <li>Synthesized the top 100 candidates</li>
+                    <li>Discovered Halicin, a powerful new antibiotic effective against drug-resistant bacteria</li>
+                </ol>
+                
+                <p>This process took months instead of years and discovered a molecule that human chemists would never have designed—it doesn't resemble any known antibiotic.</p>
+                
+                <h4>The Future: Multi-Objective Optimization</h4>
+                <p>Current research focuses on generating molecules that simultaneously optimize multiple properties:</p>
+                <ul>
+                    <li>High binding affinity to target protein</li>
+                    <li>Low toxicity</li>
+                    <li>Good oral bioavailability</li>
+                    <li>Easy to synthesize</li>
+                    <li>No off-target effects</li>
+                </ul>
+                
+                <p>Embeddings make this possible by representing all these properties in a unified space where trade-offs can be explored systematically.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-clinical-privacy" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-clinical-privacy')">&times;</span>
+            <h2 class="modal-title">Privacy-Preserving Clinical Embeddings</h2>
+            <div class="modal-body">
+                <h3>Enabling AI While Protecting Patient Privacy</h3>
+                
+                <p>Clinical data is highly sensitive. How can we use embeddings for AI-powered healthcare while protecting patient privacy?</p>
+                
+                <h4>The Privacy Challenge</h4>
+                <p>Clinical notes contain identifiable information:</p>
+                <ul>
+                    <li>Patient names, dates of birth, addresses</li>
+                    <li>Rare diseases or unique combinations of conditions</li>
+                    <li>Specific lab values and test results</li>
+                </ul>
+                
+                <p>Simply removing names isn't enough—a patient with a rare combination of conditions might still be identifiable.</p>
+                
+                <h4>Privacy-Preserving Techniques</h4>
+                
+                <p><strong>1. Federated Learning</strong></p>
+                <p>Train embeddings without centralizing data:</p>
+                <ul>
+                    <li>Each hospital trains a local model on its own data</li>
+                    <li>Only model updates (gradients) are shared, not patient data</li>
+                    <li>A central server aggregates updates to create a global model</li>
+                    <li>Result: Embeddings trained on millions of patients without any hospital sharing raw data</li>
+                </ul>
+                
+                <p><strong>2. Differential Privacy</strong></p>
+                <p>Add controlled noise to embeddings to prevent re-identification:</p>
+                <ul>
+                    <li>Original embedding: [0.72, 0.18, 0.45, ..., 0.23]</li>
+                    <li>Add calibrated noise: [0.72±0.01, 0.18±0.01, 0.45±0.01, ..., 0.23±0.01]</li>
+                    <li>Result: Individual patients can't be identified, but population-level patterns are preserved</li>
+                </ul>
+                
+                <p><strong>3. Secure Multi-Party Computation</strong></p>
+                <p>Compute embeddings on encrypted data:</p>
+                <ul>
+                    <li>Patient data is encrypted before processing</li>
+                    <li>Embeddings are computed on encrypted data using special cryptographic protocols</li>
+                    <li>Only the final embedding is decrypted, never the raw data</li>
+                </ul>
+                
+                <h4>Real-World Application: COVID-19 Research</h4>
+                <p>During the pandemic, researchers needed to analyze patient data across multiple hospitals to understand COVID-19 progression. Using federated learning with clinical embeddings:</p>
+                <ul>
+                    <li>50+ hospitals participated without sharing patient data</li>
+                    <li>Embeddings were trained on 100,000+ patient records</li>
+                    <li>Models predicted severe outcomes with 85% accuracy</li>
+                    <li>No patient privacy was compromised</li>
+                </ul>
+                
+                <h4>The Balance</h4>
+                <p>Privacy-preserving embeddings represent a balance:</p>
+                <ul>
+                    <li><strong>Privacy:</strong> Individual patients cannot be re-identified</li>
+                    <li><strong>Utility:</strong> Embeddings retain enough information for accurate predictions</li>
+                    <li><strong>Collaboration:</strong> Multiple institutions can pool knowledge without sharing data</li>
+                </ul>
+                
+                <p>This enables AI-powered healthcare while respecting patient rights and regulatory requirements (HIPAA, GDPR).</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-computational-efficiency" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-computational-efficiency')">&times;</span>
+            <h2 class="modal-title">Computational Efficiency of Embeddings</h2>
+            <div class="modal-body">
+                <h3>Why Embeddings Are Faster and More Scalable</h3>
+                
+                <p>Embeddings dramatically reduce computational requirements compared to traditional representations. Let's quantify the gains.</p>
+                
+                <h4>Memory Savings</h4>
+                
+                <table class="regular-table">
+                    <tr>
+                        <th>Representation</th>
+                        <th>Dimensions</th>
+                        <th>Memory per Word</th>
+                        <th>Total for 50K Vocabulary</th>
+                    </tr>
+                    <tr>
+                        <td><strong>One-Hot</strong></td>
+                        <td>50,000</td>
+                        <td>200 KB</td>
+                        <td>10 GB</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Embedding (300D)</strong></td>
+                        <td>300</td>
+                        <td>1.2 KB</td>
+                        <td>60 MB</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Reduction</strong></td>
+                        <td>167x</td>
+                        <td>167x</td>
+                        <td>167x</td>
+                    </tr>
+                </table>
+                
+                <p>This 167x reduction means models fit on smaller devices (phones, edge devices) and train faster.</p>
+                
+                <h4>Computation Savings</h4>
+                
+                <p>Consider a simple neural network with one hidden layer (100 units):</p>
+                
+                <table class="regular-table">
+                    <tr>
+                        <th>Representation</th>
+                        <th>Input Dimension</th>
+                        <th>Parameters (Input→Hidden)</th>
+                        <th>FLOPs per Forward Pass</th>
+                    </tr>
+                    <tr>
+                        <td><strong>One-Hot</strong></td>
+                        <td>50,000</td>
+                        <td>5,000,000</td>
+                        <td>10,000,000</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Embedding (300D)</strong></td>
+                        <td>300</td>
+                        <td>30,000</td>
+                        <td>60,000</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Speedup</strong></td>
+                        <td>167x</td>
+                        <td>167x</td>
+                        <td>167x</td>
+                    </tr>
+                </table>
+                
+                <p>This means:</p>
+                <ul>
+                    <li><strong>Training:</strong> 167x fewer parameters to update → 167x faster training</li>
+                    <li><strong>Inference:</strong> 167x fewer computations → 167x faster predictions</li>
+                    <li><strong>Energy:</strong> 167x less computation → 167x lower energy consumption</li>
+                </ul>
+                
+                <h4>Real-World Impact</h4>
+                
+                <p><strong>Mobile Devices:</strong> Google Translate can run on phones because embeddings compress language models from gigabytes to megabytes.</p>
+                
+                <p><strong>Real-Time Systems:</strong> Search engines can return results in milliseconds because document embeddings enable fast similarity search.</p>
+                
+                <p><strong>Large-Scale Training:</strong> Models like GPT-3 are trainable because embeddings reduce the input layer from millions of dimensions to thousands.</p>
+                
+                <h4>Approximate Nearest Neighbor Search</h4>
+                
+                <p>Finding similar items in embedding space is faster than in raw feature space:</p>
+                <ul>
+                    <li><strong>Brute Force:</strong> Compare query to all N items → O(N) time</li>
+                    <li><strong>With Embeddings + Indexing (FAISS, Annoy):</strong> → O(log N) time</li>
+                </ul>
+                
+                <p>For N=1 billion items:</p>
+                <ul>
+                    <li>Brute force: 1 billion comparisons</li>
+                    <li>Indexed embeddings: ~30 comparisons</li>
+                    <li>Speedup: 33 million times faster!</li>
+                </ul>
+                
+                <p>This enables real-time search over billions of documents, images, or products.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-word2vec-detail" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-word2vec-detail')">&times;</span>
+            <h2 class="modal-title">Word2Vec Architecture and Training Details</h2>
+            <div class="modal-body">
+                <h3>Complete Technical Breakdown of Word2Vec</h3>
+                
+                <p>Let's dive deep into the neural network architecture and training process of Word2Vec.</p>
+                
+                <h4>Network Architecture</h4>
+                
+                <p><strong>Input Layer:</strong></p>
+                <ul>
+                    <li>Size: Vocabulary size V (e.g., 50,000)</li>
+                    <li>Format: One-hot encoded word vector</li>
+                    <li>Example: "cat" → [0, 0, 0, 1, 0, ..., 0] (1 at position 3, rest 0)</li>
+                </ul>
+                
+                <p><strong>Hidden Layer (Embedding Layer):</strong></p>
+                <ul>
+                    <li>Size: Embedding dimension D (e.g., 300)</li>
+                    <li>Weights: Matrix W₁ of size V × D</li>
+                    <li>Operation: Lookup (not matrix multiplication!)</li>
+                    <li>For one-hot input, this simply selects row i from W₁</li>
+                    <li>This row IS the word embedding</li>
+                </ul>
+                
+                <p><strong>Output Layer:</strong></p>
+                <ul>
+                    <li>Size: Vocabulary size V</li>
+                    <li>Weights: Matrix W₂ of size D × V</li>
+                    <li>Operation: Matrix multiplication + softmax</li>
+                    <li>Output: Probability distribution over all words</li>
+                </ul>
+                
+                <h4>Training Process (Skip-gram)</h4>
+                
+                <p><strong>Forward Pass:</strong></p>
+                <ol>
+                    <li>Input: One-hot vector for target word (e.g., "fox")</li>
+                    <li>Hidden: Look up embedding from W₁ → h = W₁[i, :]</li>
+                    <li>Output: Compute scores for all words → s = W₂ᵀ × h</li>
+                    <li>Softmax: Convert scores to probabilities → p = softmax(s)</li>
+                </ol>
+                
+                <p><strong>Loss Calculation:</strong></p>
+                <p>Cross-entropy loss between predicted probabilities and actual context words:</p>
+                <p>L = -Σ log(p[context_word])</p>
+                
+                <p>For example, if context words are ["quick", "brown"], we want:</p>
+                <ul>
+                    <li>p["quick"] to be high (close to 1)</li>
+                    <li>p["brown"] to be high (close to 1)</li>
+                    <li>p[all other words] to be low (close to 0)</li>
+                </ul>
+                
+                <p><strong>Backward Pass:</strong></p>
+                <ol>
+                    <li>Compute gradient of loss with respect to W₂</li>
+                    <li>Compute gradient of loss with respect to W₁</li>
+                    <li>Update weights using gradient descent: W ← W - η × ∇L</li>
+                </ol>
+                
+                <h4>Negative Sampling Optimization</h4>
+                
+                <p>Computing softmax over 50,000 words is expensive. Negative sampling approximates this:</p>
+                
+                <p><strong>Instead of:</strong> "Maximize probability of all context words"</p>
+                <p><strong>Do:</strong> "Distinguish context words from random words"</p>
+                
+                <p>For each (target, context) pair:</p>
+                <ol>
+                    <li>Positive example: ("fox", "quick") → label = 1</li>
+                    <li>Sample k=5 negative words randomly: "banana", "car", "happy", "run", "blue"</li>
+                    <li>Negative examples: ("fox", "banana") → label = 0, ("fox", "car") → label = 0, ...</li>
+                    <li>Train binary classifier to distinguish positive from negative</li>
+                </ol>
+                
+                <p>This reduces updates from 50,000 words to just 6 words (1 positive + 5 negative), making training 8,000x faster!</p>
+                
+                <h4>Hyperparameters</h4>
+                
+                <table class="regular-table">
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Typical Value</th>
+                        <th>Effect</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Embedding Dim (D)</strong></td>
+                        <td>100-300</td>
+                        <td>Higher = more capacity, but slower and needs more data</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Window Size</strong></td>
+                        <td>5-10</td>
+                        <td>Larger = captures broader context (topics), smaller = captures syntax</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Negative Samples (k)</strong></td>
+                        <td>5-20</td>
+                        <td>More = better approximation but slower</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Learning Rate (η)</strong></td>
+                        <td>0.025</td>
+                        <td>Too high = unstable, too low = slow convergence</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Min Count</strong></td>
+                        <td>5-10</td>
+                        <td>Ignore words appearing fewer than this many times</td>
+                    </tr>
+                </table>
+                
+                <h4>Training Data Requirements</h4>
+                
+                <p>For good embeddings, you typically need:</p>
+                <ul>
+                    <li><strong>Corpus size:</strong> At least 100 million words (more is better)</li>
+                    <li><strong>Vocabulary:</strong> 10,000 - 100,000 unique words</li>
+                    <li><strong>Training time:</strong> Hours to days on GPU</li>
+                    <li><strong>Epochs:</strong> 5-15 passes through the data</li>
+                </ul>
+                
+                <p>This is why pre-trained embeddings (trained on Wikipedia, news, etc.) are so valuable—most people don't have access to such large corpora.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animated Network Background
+        const canvas = document.getElementById('network-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Create network nodes
+        const nodes = [];
+        const nodeCount = 50;
+
+        for (let i = 0; i < nodeCount; i++) {
+            nodes.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                radius: Math.random() * 2 + 1
+            });
+        }
+
+        function drawNetwork() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Update and draw nodes
+            nodes.forEach((node, i) => {
+                node.x += node.vx;
+                node.y += node.vy;
+
+                // Bounce off walls
+                if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
+                if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
+
+                // Draw node
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#999';
+                ctx.fill();
+
+                // Draw connections to nearby nodes
+                nodes.forEach((otherNode, j) => {
+                    if (i !== j) {
+                        const dx = node.x - otherNode.x;
+                        const dy = node.y - otherNode.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
+                        if (distance < 150) {
+                            ctx.beginPath();
+                            ctx.moveTo(node.x, node.y);
+                            ctx.lineTo(otherNode.x, otherNode.y);
+                            ctx.strokeStyle = `rgba(153, 153, 153, ${1 - distance / 150})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                });
+            });
+
+            requestAnimationFrame(drawNetwork);
+        }
+
+        drawNetwork();
+
+        // Section Navigation
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Update active menu items in sidebar
+            document.querySelectorAll('.menu-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelectorAll('.menu-link').forEach(link => {
+                if (link.getAttribute('onclick').includes(sectionId)) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Update active nav links in top navbar
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('onclick').includes(sectionId)) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Menu Toggle for Mobile
+        function toggleMenu() {
+            const sidebar = document.querySelector('.left-sidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            sidebar.classList.toggle('show');
+            menuToggle.classList.toggle('active');
+            
+            // Change icon based on state
+            if (sidebar.classList.contains('show')) {
+                menuToggle.innerHTML = '×';
+            } else {
+                menuToggle.innerHTML = '☰';
+            }
+        }
+
+        // Close menu when clicking on a menu item (mobile)
+        document.querySelectorAll('.sidebar-menu a').forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    const sidebar = document.querySelector('.left-sidebar');
+                    const menuToggle = document.getElementById('menuToggle');
+                    sidebar.classList.remove('show');
+                    menuToggle.classList.remove('active');
+                    menuToggle.innerHTML = '☰';
+                }
+            });
+        });
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('custom-modal')) {
+                event.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // MCQ Answer Checking
+        function checkAnswer(questionId, correctAnswer) {
+            const selected = document.querySelector(`input[name="${questionId}"]:checked`);
+            const answerDiv = document.getElementById(`${questionId}-answer`);
+
+            if (!selected) {
+                alert('Please select an answer');
+                return;
+            }
+
+            answerDiv.classList.remove('incorrect');
+            
+            if (selected.value === correctAnswer) {
+                answerDiv.classList.add('show');
+            } else {
+                answerDiv.classList.add('show', 'incorrect');
+                answerDiv.innerHTML = `
+                    <div class="answer-label">Incorrect ✗</div>
+                    <div class="answer-text">That's not quite right. The correct answer provides a more accurate explanation of the concept. Please review the section and try to understand why the correct answer better captures the key idea.</div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
