@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-QWJH7QCGRS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-QWJH7QCGRS');
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Attention Mechanism - this tutorial is all you need</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        /* --- STYLING (Preserved) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #ffffff; color: #2c3e50; overflow-x: hidden; line-height: 1.9; }
+        
+        /* Animated Background */
+        #network-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15; }
+
+        /* Navigation */
+        .top-navbar { position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border-bottom: 2px solid #e0e0e0; z-index: 1000; padding: 0.8rem 1.5rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .navbar-brand { font-size: 1.5rem; font-weight: 700; color: #2c3e50; text-decoration: none; }
+        .top-nav-links { display: flex; gap: 2rem; list-style: none; margin: 0; }
+        .top-nav-links a { text-decoration: none; color: #555; font-weight: 500; padding: 0.5rem 0; border-bottom: 2px solid transparent; transition: all 0.3s; }
+        .top-nav-links a.active, .top-nav-links a:hover { color: #2c3e50; border-bottom-color: #666; }
+        .menu-toggle { display: none; position: fixed; left: 1rem; top: 75px; z-index: 1001; background: #2c3e50; color: white; border: none; border-radius: 4px; padding: 0.5rem 0.75rem; cursor: pointer; }
+
+        /* Sidebar */
+        .left-sidebar { position: fixed; left: 0; top: 70px; width: 280px; height: calc(100vh - 70px); background: #f8f9fa; border-right: 2px solid #e0e0e0; overflow-y: auto; z-index: 999; padding: 2rem 0; transition: transform 0.3s ease; }
+        .sidebar-title { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: #888; padding: 0.8rem 2rem; letter-spacing: 1px; margin-top: 1rem; }
+        .sidebar-menu a { display: block; padding: 0.8rem 2rem; color: #555; text-decoration: none; border-left: 4px solid transparent; transition: all 0.2s; font-size: 1rem; }
+        .sidebar-menu a:hover, .sidebar-menu a.active { background: #e9ecef; border-left-color: #2c3e50; color: #2c3e50; font-weight: 600; }
+
+        /* Main Content */
+        .main-content { margin-left: 280px; margin-top: 70px; padding: 4rem 3rem; max-width: 1200px; }
+        .content-section { display: none; animation: fadeIn 0.6s ease; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Typography */
+        h1 { font-size: 2.8rem; font-weight: 800; color: #2c3e50; margin-bottom: 2rem; letter-spacing: -1px; }
+        h2 { font-size: 2rem; font-weight: 700; margin-top: 4rem; margin-bottom: 1.5rem; border-bottom: 3px solid #e0e0e0; padding-bottom: 0.8rem; color: #34495e; }
+        h3 { font-size: 1.5rem; font-weight: 600; margin-top: 2.5rem; margin-bottom: 1rem; color: #444; }
+        p { font-size: 1.15rem; margin-bottom: 1.5rem; color: #4a4a4a; text-align: justify; }
+
+        .intro-box { background: #ffffff; border-left: 5px solid #2c3e50; padding: 2rem; margin: 2rem 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 0 8px 8px 0; }
+        .concept-box { background: #f1f3f5; border-left: 5px solid #666; padding: 2rem; margin: 2.5rem 0; border-radius: 0 8px 8px 0; }
+        
+        .transform-step { margin: 2rem 0; padding: 2rem; border-radius: 12px; border-left: 6px solid; box-shadow: 0 4px 15px rgba(0,0,0,0.05); background: #fff; position: relative; }
+        .transform-step.orange { border-left-color: #FF8C42; background: linear-gradient(to right, #fff5eb, #fff); }
+        .transform-step.blue { border-left-color: #4A90E2; background: linear-gradient(to right, #ebf5ff, #fff); }
+        .transform-step.green { border-left-color: #5CB85C; background: linear-gradient(to right, #ebffef, #fff); }
+        .transform-step.grey { border-left-color: #666; background: linear-gradient(to right, #f8f9fa, #fff); }
+        .transform-step-title { font-weight: 800; font-size: 1.2rem; margin-bottom: 1rem; color: #333; }
+
+        /* Tables & Calcs */
+        .regular-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin: 2rem 0; font-size: 1rem; }
+        .regular-table th { background: #f8f9fa; padding: 1.2rem; text-align: center; font-weight: 700; border-bottom: 2px solid #dee2e6; color: #495057; }
+        .regular-table td { padding: 1.2rem; border-bottom: 1px solid #e9ecef; background: white; vertical-align: middle; text-align: center; font-family: 'Consolas', monospace; }
+        .highlight-row { background-color: #e3f2fd !important; font-weight: bold; }
+        
+        .calc-block { background: #333; color: #fff; padding: 2rem; border-radius: 8px; font-family: 'Consolas', monospace; margin: 2rem 0; overflow-x: auto; font-size: 1rem; line-height: 1.7; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+        .calc-comment { color: #88c0d0; font-style: italic; }
+        .calc-result { color: #a3be8c; font-weight: bold; }
+
+        /* Modals */
+        .modal-link { color: #2980b9; text-decoration: none; cursor: pointer; font-weight: 700; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .modal-link:hover { color: #1a5276; border-bottom-color: #1a5276; }
+        .custom-modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+        .modal-content-custom { background-color: #fff; margin: 3% auto; padding: 4rem; border-radius: 12px; width: 80%; max-width: 1000px; max-height: 90vh; overflow-y: auto; position: relative; animation: slideIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+        .modal-close { position: absolute; right: 2rem; top: 1.5rem; font-size: 3rem; cursor: pointer; color: #adb5bd; transition: color 0.2s; line-height: 1; }
+        .modal-close:hover { color: #495057; }
+        .modal-title { font-size: 2.2rem; font-weight: 800; color: #2c3e50; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #e9ecef; }
+        .modal-body p { font-size: 1.2rem; line-height: 2; color: #343a40; margin-bottom: 2rem; }
+
+        /* Code & MCQ */
+        code { background: #f1f3f5; color: #c2255c; padding: 3px 6px; border-radius: 4px; font-family: 'Consolas', monospace; font-size: 0.9em; }
+        .mcq-container { background: #f8f9fa; padding: 2.5rem; border-radius: 12px; border: 2px solid #e9ecef; margin: 4rem 0; }
+        .mcq-question { font-size: 1.3rem; font-weight: 700; color: #2c3e50; margin-bottom: 1.5rem; }
+        .mcq-option { background: white; padding: 1.2rem; margin: 0.8rem 0; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; display: flex; align-items: center; transition: all 0.2s; font-size: 1.1rem; }
+        .mcq-option:hover { border-color: #adb5bd; background: #e9ecef; }
+        .mcq-option input { margin-right: 1.5rem; transform: scale(1.3); }
+        .mcq-answer { display: none; margin-top: 1.5rem; padding: 2rem; border-radius: 8px; font-size: 1.1rem; line-height: 1.8; }
+        .mcq-answer.correct { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .mcq-answer.incorrect { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        
+        @media (max-width: 992px) {
+            .left-sidebar { transform: translateX(-100%); }
+            .left-sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 2rem; }
+            .menu-toggle { display: block; }
+            .top-nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="network-canvas"></canvas>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+    <nav class="top-navbar">
+        <a href="#" class="navbar-brand">Attention! <span></span></a>
+        <ul class="top-nav-links">
+            <li><a href="#" onclick="showSection('home')" class="nav-link active">Home</a></li>
+            <li><a href="#" onclick="showSection('input-embedding')" class="nav-link">Input & Preparation</a></li>
+            <li><a href="#" onclick="showSection('qkv-mechanics')" class="nav-link">Q, K, V Mechanics</a></li>
+            <li><a href="#" onclick="showSection('calculating-scores')" class="nav-link">Attention Scores</a></li>
+        </ul>
+    </nav>
+
+    <aside class="left-sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Module 1: Foundations</div>
+            <div class="sidebar-menu">
+                <a href="#" onclick="showSection('home')" class="menu-link active">Introduction</a>
+                <a href="#" onclick="showSection('context-problem')" class="menu-link">Why Embeddings Fail</a>
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Module 2: Preparation</div>
+            <div class="sidebar-menu">
+                <a href="#" onclick="showSection('input-embedding')" class="menu-link">Step 1: Embedding Input</a>
+                <a href="#" onclick="showSection('positional-encoding')" class="menu-link">Step 2: Adding Position</a>
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Module 3: The Computation</div>
+            <div class="sidebar-menu">
+                <a href="#" onclick="showSection('qkv-mechanics')" class="menu-link">Step 3: Q-K-V Projection</a>
+                <a href="#" onclick="showSection('calculating-scores')" class="menu-link">Step 4: Dot Products</a>
+                <a href="#" onclick="showSection('softmax-step')" class="menu-link">Step 5: The Softmax</a>
+                <a href="#" onclick="showSection('weighted-sum')" class="menu-link">Step 6: Weighted Sum</a>
+            </div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-title">Module 4: Conclusion</div>
+            <div class="sidebar-menu">
+                <a href="#" onclick="showSection('output-matrix')" class="menu-link">The Final Output Matrix</a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+
+        <section id="home" class="content-section active">
+            <h1>Toward understanding 'Attention'</h1>
+            <div class="intro-box">
+                <p>Welcome back. In our previous lecture, we covered <strong>Embeddings</strong>. You learned that we can take a biological token, like the amino acid Tryptophan (W) or the nucleotide Adenine (A), and map it to a dense vector of numbers. You learned that this vector captures the "meaning" of that token based on global statistics. For example, hydrophobic amino acids end up clustered together in vector space, far away from hydrophilic ones.</p>
+                <p>However, we ended that lecture with a significant cliffhanger. Standard embeddings are <strong>static</strong>. Once we train the model, the vector for "A" is frozen. It never changes, regardless of where "A" appears in a genome. This is a fatal flaw for complex biology. Today, we are going to solve that problem. We are going to build a mechanism that allows the DNA sequence to "read itself" and update the meaning of every nucleotide based on its neighbors. This is the <strong>Attention Mechanism</strong>.</p>
+            </div>
+            
+            <div class="concept-box">
+                <h3>The Learning Objective</h3>
+                <p>In this tutorial, we will not just discuss "concepts" abstractly. We are going to manually trace the <strong>exact arithmetic</strong> of an 8-nucleotide sequence. You will see every number, every multiplication, and every transformation.</p>
+                <p><strong>The Data:</strong> <code>A T G C G A T C</code></p>
+                <p><strong>The Goal:</strong> Calculate the new, contextualized vector for Position 3 (G) by hand, computing every variable ($Q, K, V, Z$) explicitly.</p>
+                <p>Before we begin, you must be comfortable with the concept of the <strong>Dot Product</strong>. If you feel rusty, please read the Deep Dive below.</p>
+                <p><a class="modal-link" onclick="openModal('modal-math-refresher')">Deep Dive: The Intuition of Linear Algebra (Refresher) &rarr;</a></p>
+            </div>
+        </section>
+
+        <section id="context-problem" class="content-section">
+            <h1>The Problem with Static Embeddings</h1>
+            
+            <h3>Background: "Identical Twin" Paradox</h3>
+            <p>To understand why we need Attention, we must first rigorously prove why our previous method (Static Embeddings) fails in complex biological tasks. In a static embedding model (like Word2Vec or GloVe), every token has a unique ID, and that ID maps to exactly one row in a lookup table. The model is essentially a dictionary lookup.</p>
+            <p>Let's imagine we have two different DNA sequences. Both contain the nucleotide Adenine (A), but in completely different biological contexts. In biology, context is everything; a motif is defined by the neighbours, not just the central nucleotide.</p>
+            
+            
+            
+            <ul>
+                <li><strong>Sequence 1:</strong> Contains an 'A' that is part of an <code>ATG</code> Start Codon. This 'A' initiates protein translation. It is an "Initiator."</li>
+                <li><strong>Sequence 2:</strong> Contains an 'A' that is part of a <code>TAA</code> Stop Codon. This 'A' terminates protein translation. It is a "Terminator."</li>
+            </ul>
+
+            <div class="transform-step orange">
+                <div class="transform-step-title">Visual Proof: The Failure of Static Embeddings</div>
+                <p>Assume we have trained a model where the vector for 'A' is <code>[0.5, -0.1, 0.9]</code>. Let's see what happens when we feed these two sequences into a standard neural network:</p>
+                
+                <table class="regular-table">
+                    <thead>
+                        <tr>
+                            <th>Sequence Context</th>
+                            <th>Nucleotide</th>
+                            <th>Biological Function</th>
+                            <th>The Vector The Model Sees</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Seq 1: <code>...C T <strong>A</strong> T G...</code></td>
+                            <td><strong>A</strong></td>
+                            <td>Start Signal (Initiator)</td>
+                            <td><code>[0.5, -0.1, 0.9]</code></td>
+                        </tr>
+                        <tr>
+                            <td>Seq 2: <code>...G G T <strong>A</strong> A...</code></td>
+                            <td><strong>A</strong></td>
+                            <td>Stop Signal (Terminator)</td>
+                            <td><code>[0.5, -0.1, 0.9]</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>The Consequence:</strong> Do you see the problem? The input vectors are <strong>mathematically identical</strong>. The neural network receives the exact same numbers for two completely opposing biological functions. The model is effectively blind to the context until much deeper in the network.</p>
+            </div>
+
+            <p>We need a mechanism that allows the model to look at the 'T' and 'G' next to the first 'A' and say: "Wait, this isn't just an 'A'. This is a Start-Codon-A. I need to change its vector to reflect that."</p>
+
+            <p><a class="modal-link" onclick="openModal('modal-rnn')">Deep Dive: How did RNNs try to solve this before Attention? &rarr;</a></p>
+        </section>
+
+        <section id="input-embedding" class="content-section">
+            <h1>Step 1: Input Preparation ($X$)</h1>
+            
+            <h3>Background: Converting Biology to Math</h3>
+            <p>Let's begin our manual calculation. We start with the raw DNA string. Our first task is to convert this biological string into a mathematical matrix ($X$). This involves two substeps: Tokenization and Embedding Lookup.</p>
+            <p><strong>Input Sequence:</strong> <code>A T G C G A T C</code></p>
+
+            <h3>1. Tokenization</h3>
+            <p>The neural network cannot process characters like 'A' or 'G'. It requires integers. We use a simple vocabulary mapping.</p>
+            <div class="calc-block">
+                Vocabulary: { A: 1, T: 2, G: 3, C: 4 }<br>
+                Sequence:   [ A, T, G, C, G, A, T, C ]<br>
+                Token IDs:  [ 1, 2, 3, 4, 3, 1, 2, 4 ]
+            </div>
+
+            <h3>2. The Embedding Lookup</h3>
+            <p>We have an embedding dimension $d_{model} = 4$. This means every nucleotide will be represented by 4 numbers. In a real model (like DNABERT), this might be 768 numbers. We use 4 here so we can fit the math on the screen.</p>
+            <p>The model looks up the vector for each ID from a trained matrix. Here are the <strong>actual values</strong> we will use for this tutorial.</p>
+
+            <div class="transform-step blue">
+                <div class="transform-step-title">The Embedding Matrix ($X$)</div>
+                <table class="regular-table">
+                    <tr><th>Pos</th><th>Base</th><th>Dim 1</th><th>Dim 2</th><th>Dim 3</th><th>Dim 4</th></tr>
+                    <tr><td>1</td><td>A</td><td>1.0</td><td>0.0</td><td>1.0</td><td>0.0</td></tr>
+                    <tr><td>2</td><td>T</td><td>0.0</td><td>1.0</td><td>0.0</td><td>1.0</td></tr>
+                    <tr class="highlight-row"><td>3</td><td>G</td><td>0.5</td><td>0.5</td><td>0.0</td><td>1.0</td></tr>
+                    <tr><td>4</td><td>C</td><td>0.2</td><td>0.2</td><td>0.8</td><td>0.2</td></tr>
+                    <tr><td>5</td><td>G</td><td>0.5</td><td>0.5</td><td>0.0</td><td>1.0</td></tr>
+                    <tr><td>6</td><td>A</td><td>1.0</td><td>0.0</td><td>1.0</td><td>0.0</td></tr>
+                    <tr><td>7</td><td>T</td><td>0.0</td><td>1.0</td><td>0.0</td><td>1.0</td></tr>
+                    <tr><td>8</td><td>C</td><td>0.2</td><td>0.2</td><td>0.8</td><td>0.2</td></tr>
+                </table>
+                <p><em>Note: Position 3 (G) is highlighted because that is the position we will focus on updating throughout this tutorial.</em></p>
+            </div>
+
+            <p><a class="modal-link" onclick="openModal('modal-embedding-layer')">Deep Dive: Why do we use Dense Embeddings instead of One-Hot Encoding? &rarr;</a></p>
+        </section>
+
+        <section id="positional-encoding" class="content-section">
+            <h1>Step 2: Injecting Order (Positional Encoding)</h1>
+            
+            <h3>Background: The Symmetry Problem</h3>
+            <p>Look closely at the table in the previous section. Compare Position 3 (G) and Position 5 (G). Their vectors are identical: <code>[0.5, 0.5, 0.0, 1.0]</code>.</p>
+            <p>This is a problem. In biology, a 'G' at the start of a read might be a primer binding site, while a 'G' in the middle might be a coding base. The model currently has no way to tell them apart. To fix this, we <strong>add</strong> a Positional Vector ($P$) to $X$.</p>
+            
+            
+            
+            <h3>The Calculation</h3>
+            <p>We create a new matrix $P$ of the same size as $X$. Each row in $P$ is a unique "timestamp" vector. We simply add the two matrices together: $X_{final} = X_{raw} + P$.</p>
+
+            <div class="calc-block">
+                <span class="calc-comment"># Hypothetical Positional Vectors (Simplified for Tutorial)</span><br>
+                P1 (Pos 1): [0.1, 0.1, 0.1, 0.1]<br>
+                P2 (Pos 2): [0.2, 0.2, 0.2, 0.2]<br>
+                P3 (Pos 3): [0.3, 0.3, 0.3, 0.3]<br>
+                ...<br><br>
+                <span class="calc-comment"># The Addition Operation for Position 3 (G)</span><br>
+                X_pos3_final = X_pos3_raw + P3<br>
+                X_pos3_final = [0.5, 0.5, 0.0, 1.0] + [0.3, 0.3, 0.3, 0.3]<br>
+                <span class="calc-result">Result: [0.8, 0.8, 0.3, 1.3]</span>
+            </div>
+
+            <p>From this point forward, we will assume we are working with these "Position-Aware" vectors. The vector for G at Pos 3 is now mathematically distinct from G at Pos 5, because they had different numbers added to them.</p>
+
+            <p><a class="modal-link" onclick="openModal('modal-positional')">Deep Dive: How does adding numbers not destroy the data? &rarr;</a></p>
+        </section>
+
+        <section id="qkv-mechanics" class="content-section">
+            <h1>Step 3: Calculating Q, K, V</h1>
+            
+            <h3>Background: The Concept of Role Decomposition</h3>
+            <p>We have arrived at the core innovation of the Transformer. Before we calculate anything, we must understand the concept of <strong>Roles</strong>. In a sequence, a nucleotide must perform two different jobs:</p>
+            <ol>
+                <li><strong>The Seeker (Query):</strong> It must look at its neighbors to find relevant information ("I am looking for a start codon pair").</li>
+                <li><strong>The Advertisement (Key):</strong> It must announce its own identity to others ("I am an Adenine at Pos 1").</li>
+            </ol>
+            
+            <div class="intro-box">
+                <p><strong>But what about the Value ($V$)?</strong> This is the variable students often forget.
+                <br><br>
+                If the Query and Key match, the "attention circuit" is complete. But what travels through that circuit? It is the <strong>Value vector</strong>.
+                <br>
+                - <strong>Analogy:</strong> If a Receptor (Query) binds a Ligand (Key), the cell absorbs the chemical signal (Value).</p>
+            </div>
+            
+            
+            
+            <div class="transform-step orange">
+                <div class="transform-step-title">The Transformation</div>
+                <p>We achieve this by training three distinct Linear Layers (matrices): $W_Q$, $W_K$, and $W_V$. Multiplying our input by these matrices rotates and stretches the vectors into their new roles.</p>
+                <p>For this tutorial, we will use <strong>4x4 matrices</strong>. This is crucial: it ensures our output has the same size as our input ($8 \times 4$), allowing us to stack multiple layers.</p>
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>W_Q (Query Weight)</strong><br>
+                        [[1, 0, 0, 0],<br>
+                         [0, 1, 0, 0],<br>
+                         [0, 0, 1, 0],<br>
+                         [0, 0, 0, 1]]
+                    </div>
+                    <div class="col-md-4">
+                        <strong>W_K (Key Weight)</strong><br>
+                        [[1, 0, 1, 0],<br>
+                         [0, 1, 0, 0],<br>
+                         [1, 0, 0, 0],<br>
+                         [0, 0, 0, 1]]
+                    </div>
+                    <div class="col-md-4">
+                        <strong>W_V (Value Weight)</strong><br>
+                        [[0.5, 0, 0, 0],<br>
+                         [0, 0.5, 0, 0],<br>
+                         [0, 0, 0.5, 0],<br>
+                         [0, 0, 0, 2]]
+                    </div>
+                </div>
+            </div>
+
+            <h3>The Calculation for Position 3 (G)</h3>
+            <p>Our input vector for Pos 3 is $x_3 = [0.8, 0.8, 0.3, 1.3]$. Let's generate its vectors.</p>
+            
+            
+
+            <div class="calc-block">
+                <span class="calc-comment"># 1. Calculate Query for Pos 3 (G)</span><br>
+                Q3 = x3 · W_Q<br>
+                <span class="calc-comment"># Matrix Mult: Row x Column (Identity matrix simply copies x3 here)</span><br>
+                Q3 = [0.8, 0.8, 0.3, 1.3]<br>
+                <span class="calc-result">Q3 Vector: [0.8, 0.8, 0.3, 1.3]</span>
+            </div>
+
+            <div class="calc-block">
+                 <span class="calc-comment"># 2. Calculate Key for Pos 1 (A) (Target)</span><br>
+                 <span class="calc-comment"># Assume x1 (Pos 1 input) = [1.1, 0.1, 1.1, 0.1]</span><br>
+                K1 = x1 · W_K<br>
+                K1_dim1 = (1.1*1) + (0.1*0) + (1.1*1) + (0.1*0) = 2.2<br>
+                K1_dim2 = (1.1*0) + (0.1*1) + (1.1*0) + (0.1*0) = 0.1<br>
+                K1_dim3 = (1.1*1) + (0.1*0) + (1.1*0) + (0.1*0) = 1.1<br>
+                K1_dim4 = (1.1*0) + (0.1*0) + (1.1*0) + (0.1*1) = 0.1<br>
+                <span class="calc-result">K1 Vector: [2.2, 0.1, 1.1, 0.1]</span>
+            </div>
+
+            <div class="calc-block">
+                <span class="calc-comment"># 3. Calculate VALUE Vectors (The Cargo)</span><br>
+                <span class="calc-comment"># We need V1 (for A) and V3 (for G) for later steps.</span><br><br>
+                
+                <span class="calc-comment"># Calculate V1 (Pos 1)</span><br>
+                V1 = x1 · W_V = [1.1, 0.1, 1.1, 0.1] · W_V<br>
+                V1_d1 = (1.1*0.5) = 0.55<br>
+                V1_d2 = (0.1*0.5) = 0.05<br>
+                V1_d3 = (1.1*0.5) = 0.55<br>
+                V1_d4 = (0.1*2.0) = 0.2<br>
+                <span class="calc-result">V1 Vector: [0.55, 0.05, 0.55, 0.2]</span><br><br>
+
+                <span class="calc-comment"># Calculate V3 (Pos 3)</span><br>
+                V3 = x3 · W_V = [0.8, 0.8, 0.3, 1.3] · W_V<br>
+                V3_d1 = (0.8*0.5) = 0.4<br>
+                V3_d2 = (0.8*0.5) = 0.4<br>
+                V3_d3 = (0.3*0.5) = 0.15<br>
+                V3_d4 = (1.3*2.0) = 2.6<br>
+                <span class="calc-result">V3 Vector: [0.4, 0.4, 0.15, 2.6]</span>
+            </div>
+
+            <p><a class="modal-link" onclick="openModal('modal-qkv-weights')">Deep Dive: Why do we need learned weights? Why can't we just use X? &rarr;</a></p>
+        </section>
+
+        <section id="calculating-scores" class="content-section">
+            <h1>Step 4: The Dot Product (Attention Scores)</h1>
+            
+            <h3>Background: Measuring Similarity</h3>
+            <p>We now have our Query vector for 'G' ($Q_3$) and our Key vector for 'A' ($K_1$). The question is: <strong>Do they match?</strong></p>
+            <p>In high-dimensional vector space, "matching" means "pointing in the same direction." The mathematical tool to measure this alignment is the <strong>Dot Product</strong>. If the dot product is a large positive number, the vectors are similar. If it is zero, they are unrelated.</p>
+            
+            
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">The Calculation</div>
+                <p>We calculate the score for Pos 3 attending to Pos 1. This tells us "How much does G care about A?"</p>
+                <div class="calc-block">
+                    Q3 = [0.8, 0.8, 0.3, 1.3]<br>
+                    K1 = [2.2, 0.1, 1.1, 0.1]<br><br>
+                    <span class="calc-comment"># Dot Product: Sum of element-wise multiplication</span><br>
+                    Score = (0.8 * 2.2) + (0.8 * 0.1) + (0.3 * 1.1) + (1.3 * 0.1)<br>
+                    Score = 1.76 + 0.08 + 0.33 + 0.13<br>
+                    <span class="calc-result">Raw Score (G attending to A) = 2.30</span>
+                </div>
+            </div>
+
+            <p>This score of <strong>2.30</strong> indicates a strong relationship. If we calculated the score between G and C (Pos 4), we might get a score of -0.5, indicating no relationship.</p>
+            <p>For the sake of this tutorial, let's assume we ran this calculation for all 8 positions and got the following raw scores:</p>
+            <p><code>Scores = [2.30, 1.95, 4.50, -0.50, 0.10, 2.10, 1.80, -1.00]</code></p>
+        </section>
+
+        <section id="softmax-step" class="content-section">
+            <h1>Step 5: The Softmax (Normalization)</h1>
+            
+            <h3>Background: From Scores to Probabilities</h3>
+            <p>We have a raw score of 2.30. But what does that mean? Is it out of 10? Out of 100? Neural networks work best with <strong>Probabilities</strong>.</p>
+            <p>We need to convert our list of raw scores into a list of percentages that sum up to exactly 100%. This allows us to say: "Position 3 pays 7% of its attention to Position 1." The function that does this is <strong>Softmax</strong>.</p>
+            
+            <div class="calc-block">
+                <span class="calc-comment"># Formula: e^x / Sum(e^x)</span><br><br>
+                
+                <span class="calc-comment"># 1. Exponentiate the scores (e^x)</span><br>
+                e^2.30 ≈ 9.97<br>
+                e^1.95 ≈ 7.02<br>
+                e^4.50 ≈ 90.01 <span class="calc-comment">(Note: Self-attention is usually high)</span><br>
+                e^-0.50 ≈ 0.60<br>
+                ...<br>
+                Sum of all Exponentials ≈ 125.0<br><br>
+
+                <span class="calc-comment"># 2. Divide each by the Sum to get Probabilities</span><br>
+                Weight_1 (A) = 9.97 / 125.0 = <span class="calc-result">0.08 (8%)</span><br>
+                Weight_2 (T) = 7.02 / 125.0 = <span class="calc-result">0.056 (5.6%)</span><br>
+                Weight_3 (G) = 90.01 / 125.0 = <span class="calc-result">0.72 (72%)</span><br>
+                Weight_4 (C) = 0.60 / 125.0 = <span class="calc-result">0.005 (0.5%)</span>
+            </div>
+
+            <p>This is a crucial insight. Even though Position 1 had a decent score (2.30), the Softmax function highlights that Position 3 is <strong>mostly</strong> obsessed with itself (72%), which is common in early layers. However, it still maintains a significant 8% connection to the 'A' at Position 1, linking them together.</p>
+
+            <p><a class="modal-link" onclick="openModal('modal-softmax')">Deep Dive: The "Winner Takes All" effect of Softmax &rarr;</a></p>
+        </section>
+
+        <section id="weighted-sum" class="content-section">
+            <h1>Step 6: The Update (Weighted Sum)</h1>
+            
+            <h3>Background: The Mixing Step</h3>
+            <p>We are at the final step. We have the weights (8%, 5.6%, 72%...). Now we must actually <strong>construct the new vector</strong>.</p>
+            
+            <div class="intro-box">
+                <p><strong>Crucial Concept:</strong> This is the most common student error. We do NOT multiply the weights by the Input $X$, nor by the Queries $Q$, nor by the Keys $K$. We multiply the weights by the <strong>Value Vectors ($V$)</strong>.</p>
+            </div>
+            
+            <p>Remember our analogy: The Receptor (Query) matched the Ligand (Key), so now the cell absorbs the <strong>Cargo (Value)</strong>. The Value vector contains the actual semantic information that we want to pass to the next layer.</p>
+
+            <div class="transform-step green">
+                <div class="transform-step-title">Constructing Z3</div>
+                <p>Let's calculate the final vector $Z_3$. We will use the Value vectors we calculated explicitly in Step 3.</p>
+                <ul>
+                    <li>$V_1$ (from A) = $[0.55, 0.05, 0.55, 0.2]$</li>
+                    <li>$V_2$ (from T) = $[1.0, 1.0, 1.0, 1.0]$ (Assumed for simplicity)</li>
+                    <li>$V_3$ (from G) = $[0.4, 0.4, 0.15, 2.6]$</li>
+                </ul>
+                <div class="calc-block">
+                    Formula: Z3 = (Weight1 * V1) + (Weight2 * V2) + (Weight3 * V3) + ...<br><br>
+                    
+                    <span class="calc-comment"># Contribution from A (8%)</span><br>
+                    0.08 * [0.55, 0.05, 0.55, 0.2] = [0.044, 0.004, 0.044, 0.016]<br><br>
+
+                    <span class="calc-comment"># Contribution from T (5.6%)</span><br>
+                    0.056 * [1.0, 1.0, 1.0, 1.0] = [0.056, 0.056, 0.056, 0.056]<br><br>
+
+                    <span class="calc-comment"># Contribution from G (72%)</span><br>
+                    0.72 * [0.4, 0.4, 0.15, 2.6] = [0.288, 0.288, 0.108, 1.872]<br><br>
+
+                    <span class="calc-comment"># Summing them all up</span><br>
+                    Z3 = [0.388, 0.348, 0.208, 1.944]
+                </div>
+            </div>
+
+            <p><strong>The Result:</strong> The new vector $Z_3$ is roughly $[0.39, 0.35, 0.21, 1.94]$.</p>
+            <p>Look at how this vector has changed. It is no longer just "G" (which was $[0.4, 0.4, 0.15, 2.6]$). It has been pulled slightly downwards by the values of A. This mathematical "pull" is the Context. The vector $Z_3$ now implicitly carries the information: <em>"I am a G, but I am connected to the A and T preceding me."</em></p>
+        </section>
+
+        <section id="output-matrix" class="content-section">
+            <h1>The Final Output Matrix</h1>
+            <p>We just painstakingly calculated the output for a single position ($Z_3$). In a real GPU, we do not run a loop. We compute this for all 8 positions simultaneously using one giant Matrix Multiplication formula.</p>
+            
+            <h3>Visualizing the Full Result</h3>
+            <p>The output of the Self-Attention layer is a new matrix, $Z$, which has the exact same dimensions as our input $X$ ($8 \times 4$). This dimension preservation is critical: it allows us to feed this output directly into another Attention block, creating deep networks.</p>
+            
+            <table class="regular-table">
+                <thead>
+                    <tr><th>Pos</th><th>Original Base</th><th>New Context Vector (Z)</th><th>Interpretation</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>A</td><td>$[0.35, 0.05, 0.35, 0.1]$</td><td>A, influenced by T</td></tr>
+                    <tr><td>2</td><td>T</td><td>$[0.50, 0.50, 0.50, 0.50]$</td><td>T, influenced by A and G</td></tr>
+                    <tr class="highlight-row"><td>3</td><td>G</td><td>$[0.39, 0.35, 0.21, 1.94]$</td><td>G + strong Start Codon context</td></tr>
+                    <tr><td>4</td><td>C</td><td>$[0.20, 0.20, 0.80, 0.20]$</td><td>Isolated C (No strong attention)</td></tr>
+                    <tr><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+                    <tr><td>8</td><td>C</td><td>$[0.21, 0.21, 0.81, 0.21]$</td><td>C context</td></tr>
+                </tbody>
+            </table>
+
+            <div class="transform-step grey">
+                <div class="transform-step-title">The Master Equation</div>
+                <div class="transform-step-content" style="font-size: 1.3rem; text-align: center;">
+                    $$Attention(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+                </div>
+                <p style="margin-top: 1rem;">This single equation summarizes our entire manual calculation:</p>
+                <ol>
+                    <li><strong>$QK^T$:</strong> Calculate Dot Products (Similarity Scores).</li>
+                    <li><strong>$\sqrt{d_k}$:</strong> Scale numbers down to prevent explosion.</li>
+                    <li><strong>Softmax:</strong> Convert to Probabilities.</li>
+                    <li><strong>$V$:</strong> Create the Weighted Sum of Values.</li>
+                </ol>
+            </div>
+            
+            <p><a class="modal-link" onclick="openModal('modal-residual')">Deep Dive: Why do dimensions must match? (Residual Connections) &rarr;</a></p>
+
+            <div class="mcq-container">
+                <p class="mcq-question">Q: If we change the nucleotide at Position 8 from C to A, does the output vector $Z_3$ change?</p>
+                <label class="mcq-option"><input type="radio" name="final_q" value="a"> No, because Position 3 is too far away from Position 8.</label>
+                <label class="mcq-option"><input type="radio" name="final_q" value="b"> Yes, because $K_8$ changes, which changes the Score for Pos 3 vs Pos 8, which subtly shifts the Softmax distribution.</label>
+                <button class="btn btn-dark mt-2" onclick="checkAnswer('final_q', 'b')">Check Answer</button>
+                <div id="final_q-answer" class="mcq-answer">
+                    <strong>Correct!</strong> This is the beauty of Attention (and its curse). Every token is connected to every other token. A change in the last nucleotide theoretically affects the representation of the first nucleotide, even if the change is microscopic (0.001%).
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="modal-math-refresher" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-math-refresher')">&times;</span>
+            <h2 class="modal-title">Deep Dive: Linear Algebra Intuition</h2>
+            <div class="modal-body">
+                <p><strong>1. Vectors as Meaning</strong><br>
+                In data science, a vector is not just a list of numbers; it is a coordinate in a "meaning space." Think of a map. New York is at coordinate [40, -74]. If I give you another coordinate [41, -73], you know it is geographically close to New York.
+                <br><br>
+                Similarly, if we train an embedding model, the vector for "Start Codon" and "Methionine" will point in a similar direction. The computer understands they are related because their coordinates are close.</p>
+                
+                <p><strong>2. The Dot Product as a Similarity Sensor</strong><br>
+                The dot product is the mathematical tool we use to measure this alignment.
+                $$a \cdot b = \sum a_i b_i$$
+                <br>
+                <strong>Example Calculation:</strong><br>
+                Vector A = [1, 2]<br>
+                Vector B = [3, 4]<br>
+                Dot Product = (1*3) + (2*4) = 3 + 8 = 11.
+                <br><br>
+                If two vectors are perpendicular (orthogonal), their dot product is 0. This implies they are completely unrelated. For example, a vector representing "Intron" and a vector representing "Exon" might be orthogonal. The Attention mechanism uses this property to filter out irrelevant information.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-rnn" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-rnn')">&times;</span>
+            <h2 class="modal-title">Why not Recurrent Neural Networks (RNNs)?</h2>
+            <div class="modal-body">
+                <p>Before Attention (pre-2017), the standard way to solve the Context Problem was using Recurrent Neural Networks (RNNs). To understand why Attention won, we must understand why RNNs failed.</p>
+                
+                <p><strong>The Mechanism:</strong> An RNN reads the DNA sequence like a human reads a book: one word at a time, from left to right. It maintains a "memory" (hidden state) that it updates at every step. When it reads Position 100, it theoretically "remembers" Position 1.</p>
+                
+                <p><strong>The Calculation Problem (Vanishing Gradient):</strong><br>
+                Imagine playing the game "Telephone." You whisper a message to person 1, who whispers it to person 2. By the time it reaches person 100, the message is garbled. Mathematically, this is because we are multiplying gradients over and over. If the weight is even slightly less than 1 (e.g., 0.9), then $0.9^{100} \approx 0.000026$. The signal vanishes. The network effectively forgets the beginning of the gene.</p>
+                
+                <p><strong>The Solution:</strong> Attention suggests a radical alternative: <strong>Don't read sequentially. Read everything at once.</strong> By allowing Position 1000 to compare itself directly to Position 1 via a dot product, we eliminate the distance between them. The "memory" is perfect, regardless of sequence length. This "Direct Access" is why Transformers revolutionized biology, where long-range interactions (like enhancers looping to promoters) are critical.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-embedding-layer" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-embedding-layer')">&times;</span>
+            <h2 class="modal-title">Deep Dive: Dense Embeddings vs. One-Hot</h2>
+            <div class="modal-body">
+                <p>Students often ask: <em>"Why can't we just use [1, 0, 0, 0] for A and [0, 1, 0, 0] for T?"</em> This is called One-Hot Encoding.</p>
+                
+                <p><strong>1. The Math of One-Hot:</strong><br>
+                Vector A: [1, 0, 0, 0]<br>
+                Vector T: [0, 1, 0, 0]<br>
+                Dot Product: (1*0) + (0*1) + ... = 0.<br>
+                Distance: $\sqrt{2}$.<br>
+                In One-Hot encoding, every vector is mathematically equidistant from every other vector. It says "A is just as different from T as it is from G."</p>
+                
+                <p><strong>2. The Biological Reality:</strong><br>
+                This assumption is false. Adenine (A) and Guanine (G) are both Purines (double-ring structures). They share chemical properties. Thymine (T) is a Pyrimidine.
+                <br><br>
+                A <strong>Dense Embedding</strong> allows the model to learn these relationships. It can learn to place the vector for 'A' closer to 'G' than to 'T' in vector space (e.g., dot product 0.8 vs 0.2). This gives the Attention mechanism a "head start" by providing chemically accurate inputs. It effectively captures the "Physicochemical Properties" of the nucleotides before any processing even begins.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-positional" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-positional')">&times;</span>
+            <h2 class="modal-title">How Positional Encoding Works</h2>
+            <div class="modal-body">
+                <p>It seems counter-intuitive to just "add" a position vector to a meaning vector. Doesn't that corrupt the data? If 'A' is 1.0, and we add 0.5 to it, isn't it now a different nucleotide?</p>
+                
+                <p><strong>The High-Dimensional Trick:</strong> Yes, it technically changes the vector. But imagine our embedding dimension is very large (e.g., 512). The "Meaning" of the nucleotide might occupy the first 200 dimensions, while the "Position" information might occupy the lower dimensions. Because the space is so vast, the model can easily learn to separate the "What" (nucleotide identity) from the "Where" (position index).</p>
+                
+                <p><strong>The Calculation Pattern:</strong> We typically use Sine and Cosine waves.<br>
+                $$P_{(pos, 2i)} = \sin(pos / 10000^{2i/d})$$<br>
+                
+                <strong>Why Waves?</strong><br>
+                Waves allow the model to learn relative distances easily. If you want to look at the nucleotide "3 positions back," there is a constant linear transformation that can shift the sine wave back by 3 phases. This makes it easy for the model to learn patterns like "Attend to the nucleotide 10bp upstream" (typical for promoter regions).</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-qkv-weights" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-qkv-weights')">&times;</span>
+            <h2 class="modal-title">Why do we need Weights $W_Q, W_K, W_V$?</h2>
+            <div class="modal-body">
+                <p>A common question is: <em>"Why calculate $Q=XW_Q$? Why not just use the input $X$ as the query?"</em></p>
+                
+                <p><strong>The Role Mismatch:</strong> The information you need to <strong>ask</strong> a question is often different from the information you need to <strong>answer</strong> it.</p>
+                
+                <p><strong>Biological Analogy:</strong><br>
+                Consider a protein interaction. To find a binding partner, an amino acid might "Query" for a <strong>positive charge</strong>.<br>
+                However, the "Key" that matches that query must effectively say "I have a <strong>negative charge</strong>."<br>
+                If we used the exact same vector for Query and Key, we would be searching for identical items (Positive searching for Positive), which is biologically wrong. We want complements, not clones.</p>
+                
+                <p>The Weight matrices $W$ act as <strong>Projection Filters</strong>. They allow the model to rotate the input vector $X$. <br>
+                - $W_Q$ rotates $X$ to expose its "Seeking" properties.<br>
+                - $W_K$ rotates $X$ to expose its "Matching" properties.<br>
+                This flexibility allows the model to learn extremely complex, non-linear relationships between biological tokens.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-softmax" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-softmax')">&times;</span>
+            <h2 class="modal-title">Why Softmax?</h2>
+            <div class="modal-body">
+                <p>Why do we use the Softmax function instead of just dividing by the sum (standard normalization)?</p>
+                
+                <p><strong>The "Winner Takes All" Effect:</strong> Softmax uses an exponential function ($e^x$). This has a dramatic effect on the numbers. It suppresses low scores and amplifies high scores.</p>
+                
+                <p><strong>Calculation Example:</strong><br>
+                Scores: <code>[10, 9, 5]</code><br>
+                <strong>Linear Normalization:</strong> 10 / (10+9+5) = <strong>0.41</strong>. (The top two are close).<br>
+                <strong>Softmax:</strong> $e^{10} \approx 22026$, $e^9 \approx 8103$, $e^5 \approx 148$.<br>
+                Prob = 22026 / (22026 + 8103 + 148) = <strong>0.73</strong>. (The top score dominates!).</p>
+                
+                <p><strong>Biological Relevance:</strong> In biology, interactions are often specific. A Transcription Factor binds to a specific motif. We don't want it to pay "a little bit" of attention to the garbage DNA around it. We want it to focus 99% on the motif and 1% on the rest. Softmax forces this decisiveness. It acts as a "Focusing Lens," sharpening the model's attention on what truly matters.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="modal-residual" class="custom-modal">
+        <div class="modal-content-custom">
+            <span class="modal-close" onclick="closeModal('modal-residual')">&times;</span>
+            <h2 class="modal-title">Deep Dive: Residual Connections</h2>
+            <div class="modal-body">
+                <p><strong>Why did we obsess over keeping the output $8 \times 4$?</strong></p>
+                <p>In Deep Learning, particularly in Transformers, we use a trick called <strong>Residual Connections</strong> (or Skip Connections). After we calculate the attention output $Z$, we don't just pass $Z$ to the next layer. We do this:</p>
+                <p>$$Output = Z + Input$$</p>
+                <p>We add the original input back to the output! This allows the gradient to flow straight through the network during training, preventing the "Vanishing Gradient" problem. It also means the Attention mechanism only has to learn the "difference" (the residual) needed to improve the vector, rather than relearning the whole vector from scratch.</p>
+                <p><strong>The Constraint:</strong> You can only add two matrices if they are the <strong>exact same size</strong>. This is why we ensured our Weight matrices were $4 \times 4$—so that our output $Z$ would match our input $X$ perfectly.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- ANIMATION ---
+        const canvas = document.getElementById('network-canvas');
+        const ctx = canvas.getContext('2d');
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const nodes = Array.from({length: 40}, () => ({
+            x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+            vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5,
+            radius: Math.random() * 2 + 1
+        }));
+
+        function drawNetwork() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            nodes.forEach((node, i) => {
+                node.x+=node.vx; node.y+=node.vy;
+                if(node.x<0||node.x>canvas.width) node.vx*=-1;
+                if(node.y<0||node.y>canvas.height) node.vy*=-1;
+                ctx.beginPath(); ctx.arc(node.x, node.y, node.radius, 0, Math.PI*2); ctx.fillStyle='#999'; ctx.fill();
+                nodes.forEach((other, j) => {
+                    if(i!==j) {
+                        const d = Math.hypot(node.x-other.x, node.y-other.y);
+                        if(d<150) {
+                            ctx.beginPath(); ctx.moveTo(node.x, node.y); ctx.lineTo(other.x, other.y);
+                            ctx.strokeStyle=`rgba(153,153,153,${1-d/150})`; ctx.stroke();
+                        }
+                    }
+                });
+            });
+            requestAnimationFrame(drawNetwork);
+        }
+        drawNetwork();
+
+        // --- NAVIGATION & MATHJAX RE-RENDER ---
+        function showSection(id) {
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            document.querySelectorAll('.nav-link, .menu-link').forEach(el => {
+                el.classList.remove('active');
+                if(el.getAttribute('onclick').includes(id)) el.classList.add('active');
+            });
+            
+            // FORCE MATHJAX TO RENDER NEW CONTENT
+            if(window.MathJax) {
+                MathJax.typesetPromise();
+            }
+            
+            window.scrollTo(0,0);
+        }
+
+        function toggleMenu() {
+            const sidebar = document.querySelector('.left-sidebar');
+            const btn = document.querySelector('.menu-toggle');
+            sidebar.classList.toggle('show');
+            btn.innerHTML = sidebar.classList.contains('show') ? '×' : '☰';
+        }
+
+        // --- MODAL LOGIC ---
+        function openModal(id) { document.getElementById(id).style.display='block'; document.body.style.overflow='hidden'; }
+        function closeModal(id) { document.getElementById(id).style.display='none'; document.body.style.overflow='auto'; }
+        window.onclick = function(e) { if(e.target.classList.contains('custom-modal')) { e.target.style.display='none'; document.body.style.overflow='auto'; }}
+
+        // --- MCQ LOGIC ---
+        function checkAnswer(name, correctVal) {
+            const selected = document.querySelector(`input[name="${name}"]:checked`);
+            const ansBox = document.getElementById(name+'-answer');
+            if(!selected) { alert("Please select an option."); return; }
+            ansBox.style.display = 'block';
+            if(selected.value === correctVal) {
+                ansBox.className = 'mcq-answer correct';
+                ansBox.innerHTML = '<strong>Correct!</strong> Well done.';
+            } else {
+                ansBox.className = 'mcq-answer incorrect';
+                ansBox.innerHTML = '<strong>Incorrect.</strong> Please review the calculation logic above.';
+            }
+        }
+    </script>
+</body>
+</html>
